@@ -54,7 +54,7 @@ function RuleTypeCard({ type }) {
                 <div className="references">
                     {type.references.map((ref, i) => (
                         <a href={ref} target="_blank" rel="noreferrer" key={i} className="ref-link">
-                            🔗 {new URL(ref).hostname}
+                            🔗 {(() => { try { return new URL(ref).hostname; } catch { return ref; } })()}
                         </a>
                     ))}
                 </div>
@@ -88,7 +88,7 @@ function FindingCard({ finding }) {
 
 export default function ResultsPage({ result, onRestart }) {
     const riskCfg = RISK_CONFIG[result.riskLevel] || RISK_CONFIG.low;
-    const hasFindigs = result.findings.length > 0;
+    const hasFindings = result.findings.length > 0;
 
     return (
         <div className="results-page">
@@ -125,7 +125,7 @@ export default function ResultsPage({ result, onRestart }) {
             </section>
 
             {/* Findings */}
-            {hasFindigs ? (
+            {hasFindings ? (
                 <section className="findings-section fade-in-up">
                     <h2 className="section-title">🔍 Tespit Edilen Zafiyetler</h2>
                     <div className="findings-list">

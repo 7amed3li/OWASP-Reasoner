@@ -1,8 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('renders OWASP Reasoner hero title', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  const heading = screen.getByText(/OWASP/i);
+  expect(heading).toBeInTheDocument();
+});
+
+test('renders start button', () => {
+  render(<App />);
+  const btn = screen.getByRole('button', { name: /analizi başlat/i });
+  expect(btn).toBeInTheDocument();
 });

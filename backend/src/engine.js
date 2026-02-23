@@ -58,6 +58,15 @@ class OWASPInferenceEngine {
      * @returns {Object} Çıkarım sonuçları
      */
     reason(answers) {
+        // Adım 0: Girdi doğrulama
+        if (
+            answers === null ||
+            answers === undefined ||
+            typeof answers !== 'object' ||
+            Array.isArray(answers)
+        ) {
+            throw new TypeError('answers bir plain object olmalı: { questionId: boolean }');
+        }
         // Adım 1: Çalışma belleğini gerçeklerle doldur
         this.factMemory = { ...answers };
 
@@ -175,6 +184,7 @@ class OWASPInferenceEngine {
         if (findings.length === 0) return 'low';
         if (findings.some(f => f.severity === 'critical')) return 'critical';
         if (findings.some(f => f.severity === 'high')) return 'high';
+        if (findings.every(f => f.severity === 'low')) return 'low';
         return 'medium';
     }
 

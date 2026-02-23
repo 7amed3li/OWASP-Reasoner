@@ -9,7 +9,16 @@ const OWASPInferenceEngine = require('./engine');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// CORS: CORS_ORIGINS env var'dan whitelist oku (yoksa dev için her şeye izin ver)
+const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map(o => o.trim())
+    : null;
+
+const corsOptions = corsOrigins
+    ? { origin: (origin, cb) => cb(null, !origin || corsOrigins.includes(origin)) }
+    : {};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const engine = new OWASPInferenceEngine();
@@ -44,7 +53,8 @@ app.post('/api/analyze', (req, res) => {
         const result = engine.reason(answers);
         res.json({ success: true, data: result });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        const status = err instanceof TypeError ? 400 : 500;
+        res.status(status).json({ success: false, error: err.message });
     }
 });
 
@@ -53,9 +63,12 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', version: '2.0.0', engine: 'Forward Chaining' });
 });
 
-app.listen(PORT, () => {
-    console.log(`OWASP Reasoner API → http://localhost:${PORT}`);
-    console.log(`Çıkarım Motoru: İleri Zincirleme (Forward Chaining)`);
-});
+// Sunucuyu sadece doğrudan çalıştırıldığında başlat (import edilince başlatma)
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`OWASP Reasoner API → http://localhost:${PORT}`);
+        console.log(`Çıkarım Motoru: İleri Zincirleme (Forward Chaining)`);
+    });
+}
 
 module.exports = app;

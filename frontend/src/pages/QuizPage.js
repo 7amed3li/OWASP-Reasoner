@@ -18,12 +18,7 @@ export default function QuizPage({ onComplete }) {
     }, []);
 
     const handleAnswer = useCallback((id, value) => {
-        setAnswers(prev => {
-            const next = { ...prev };
-            if (value === undefined) delete next[id];
-            else next[id] = value;
-            return next;
-        });
+        setAnswers(prev => ({ ...prev, [id]: value }));
     }, []);
 
     const handleNext = () => setCurrentIdx(i => Math.min(i + 1, questions.length - 1));
@@ -32,7 +27,11 @@ export default function QuizPage({ onComplete }) {
     const handleSubmit = async () => {
         setSubmitting(true);
         try {
-            const result = await analyzeAnswers(answers);
+            // null = atlandı → engine'e gönderme, sadece true/false gönder
+            const payload = Object.fromEntries(
+                Object.entries(answers).filter(([, v]) => v !== null)
+            );
+            const result = await analyzeAnswers(payload);
             onComplete(result);
         } catch {
             setError('Analiz sırasında hata oluştu.');
@@ -40,7 +39,8 @@ export default function QuizPage({ onComplete }) {
         }
     };
 
-    const answered = Object.keys(answers).length;
+    // null = atlandı, undefined = henüz dokunulmadı
+    const answered = Object.values(answers).filter(v => v !== null && v !== undefined).length;
     const progress = questions.length > 0 ? ((currentIdx + 1) / questions.length) * 100 : 0;
 
     if (loading) return <div className="quiz-loading"><div className="loading-spinner" /><p>Sorular yükleniyor...</p></div>;
@@ -60,7 +60,7 @@ export default function QuizPage({ onComplete }) {
                 <div className="sidebar-title">Kategoriler</div>
                 {categories.map((cat, i) => {
                     const catQuestions = questions.filter(q => q.categoryName === cat);
-                    const catAnswered = catQuestions.filter(q => answers[q.id] !== undefined).length;
+                    const catAnswered = catQuestions.filter(q => answers[q.id] === true || answers[q.id] === false).length;
                     return (
                         <div
                             key={cat}

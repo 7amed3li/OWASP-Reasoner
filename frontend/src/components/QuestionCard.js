@@ -36,8 +36,8 @@ export default function QuestionCard({ question, value, onChange, index, total }
                 </button>
                 <button
                     id={`q-${question.id}-skip`}
-                    className={`answer-btn answer-skip ${value === undefined ? 'selected' : ''}`}
-                    onClick={() => onChange(question.id, undefined)}
+                    className={`answer-btn answer-skip ${value === null ? 'selected' : ''}`}
+                    onClick={() => onChange(question.id, null)}
                 >
                     <span>Atla</span>
                 </button>

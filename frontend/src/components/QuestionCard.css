@@ -31,7 +31,7 @@
 }
 
 .qcard-counter {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: JetBrains Mono, monospace;
     font-size: 0.8rem;
     color: var(--text-muted);
 }
@@ -71,7 +71,7 @@
 
 .symptom-weight {
     font-size: 0.72rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: JetBrains Mono, monospace;
     color: var(--text-muted);
 }
 
@@ -91,7 +91,7 @@
     border: 1px solid var(--border);
     background: var(--bg-secondary);
     color: var(--text-secondary);
-    font-family: 'Inter', sans-serif;
+    font-family: Inter, sans-serif;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
