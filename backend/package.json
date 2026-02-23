@@ -1,13 +1,27 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "owasp-reasoner-backend",
+  "version": "2.0.0",
+  "description": "OWASP Reasoner - İleri Zincirleme Çıkarım Motoru (Forward Chaining Expert System)",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "engine": "node src/engine.js"
   },
-  "keywords": [],
+  "keywords": [
+    "owasp",
+    "expert-system",
+    "forward-chaining",
+    "security"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
 }

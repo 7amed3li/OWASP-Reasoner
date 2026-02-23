@@ -1,0 +1,354 @@
+.results-page {
+    padding: 40px 0 100px;
+}
+
+/* Risk Summary */
+.risk-summary {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 32px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.risk-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.risk-icon {
+    font-size: 3rem;
+    flex-shrink: 0;
+}
+
+.risk-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.risk-level {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.risk-summary-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    max-width: 480px;
+    line-height: 1.6;
+}
+
+.risk-stats {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.risk-stat {
+    text-align: center;
+    min-width: 70px;
+}
+
+.rs-num {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.rs-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Findings */
+.findings-section {
+    margin-bottom: 48px;
+}
+
+.findings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.finding-card {
+    padding: 28px;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.finding-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.finding-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.finding-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.finding-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.finding-type-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Rule Type Card */
+.finding-types {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.rule-type-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+}
+
+.rt-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.rt-id-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 110px;
+}
+
+.rt-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+}
+
+.rt-cwe {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+}
+
+.rt-score-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rt-score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-orange), var(--severity-critical));
+    border-radius: 4px;
+}
+
+.rt-score-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.rt-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+/* Indicators */
+.indicators,
+.remediation {
+    margin-bottom: 14px;
+}
+
+.ind-label,
+.rem-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.indicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+}
+
+.indicator.triggered {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.ind-symptom {
+    color: var(--text-secondary);
+}
+
+.ind-weight {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--severity-critical);
+    font-weight: 700;
+}
+
+/* Remediation */
+.remediation ul {
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.remediation li {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    padding: 6px 10px 6px 24px;
+    background: rgba(0, 255, 136, 0.05);
+    border: 1px solid rgba(0, 255, 136, 0.12);
+    border-radius: 6px;
+    position: relative;
+}
+
+.remediation li::before {
+    content: '✓';
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    font-size: 0.75rem;
+    color: var(--accent-green);
+}
+
+/* References */
+.references {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ref-link {
+    font-size: 0.75rem;
+    color: var(--accent-cyan);
+    text-decoration: none;
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    padding: 3px 10px;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.ref-link:hover {
+    background: rgba(0, 212, 255, 0.12);
+}
+
+/* No findings */
+.no-findings {
+    padding: 60px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.no-findings-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.no-findings h2 {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+    color: var(--accent-green);
+}
+
+.no-findings p {
+    color: var(--text-secondary);
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+/* Safe */
+.safe-section {
+    margin-bottom: 48px;
+}
+
+.safe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.safe-card {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.safe-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.safe-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--accent-green);
+}
+
+/* Footer */
+.results-footer {
+    text-align: center;
+    padding-top: 20px;
+}
+
+.footer-note {
+    margin-top: 12px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+}

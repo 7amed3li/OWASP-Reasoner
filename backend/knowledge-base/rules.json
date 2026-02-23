@@ -1,4 +1,397 @@
 {
-  "version": "1.0.0",
-  "categories": []
+  "version": "1.1.0",
+  "categories": [
+    {
+      "id": "A01:2021",
+      "name": "Broken Access Control",
+      "severity": "critical",
+      "description": "Erişim kontrolü kısıtlamalarını ihlal eden politikalar. Saldırganlar bu açıklardan yararlanarak yetkisiz işlemler yapabilir.",
+      "types": [
+        {
+          "id": "R-IDOR-01",
+          "name": "Insecure Direct Object Reference (IDOR)",
+          "cwe": "CWE-639",
+          "description": "Kullanıcı tarafından kontrol edilen değerlerin (ID, dosya adı vb.) sunucu tarafında doğrulanmadan doğrudan nesne erişiminde kullanılması.",
+          "indicators": [
+            {
+              "id": "IDOR-S1",
+              "question": "URL veya parametrelerde kullanıcı/kayıt ID'si gibi tahmin edilebilir sayısal değerler var mı? (Örn: /profile?id=42)",
+              "symptom": "Tahmin Edilebilir Nesne Referansı",
+              "weight": 3
+            },
+            {
+              "id": "IDOR-S2",
+              "question": "Bu ID değerini değiştirdiğinde (örn: id=42 → id=43), başka bir kullanıcının verisine erişebiliyor musun?",
+              "symptom": "Yetersiz Nesne Sahiplik Doğrulaması",
+              "weight": 3
+            },
+            {
+              "id": "IDOR-S3",
+              "question": "Erişim reddedildi (403 Forbidden) hatası almıyor musun?",
+              "symptom": "Eksik Erişim Kontrol Yanıtı",
+              "weight": 2
+            },
+            {
+              "id": "IDOR-S4",
+              "question": "API endpoint, sadece kendi ID'nle kullanman gerekirken herhangi bir ID'yi kabul ediyor mu?",
+              "symptom": "Sunucu Taraflı Sahiplik Kontrolü Eksikliği",
+              "weight": 3
+            },
+            {
+              "id": "IDOR-S5",
+              "question": "Başka bir kullanıcının dosyasını doğrudan URL ile (örn: /files/user43_report.pdf) indirebiliyor musun?",
+              "symptom": "Dosya Bazlı IDOR",
+              "weight": 2
+            }
+          ],
+          "threshold": 5,
+          "owasp_ref": "A01:2021",
+          "remediation": [
+            "Sunucu tarafında nesne sahipliği doğrulayın (session'daki kullanıcı ID'si ile kayıt sahibini karşılaştırın).",
+            "Doğrudan ID yerine tahmin edilemez referanslar kullanın (UUID, kripto token).",
+            "Her kaynak erişiminde yetkilendirme kontrolü yapın.",
+            "Erişim reddedildiğinde loglama ve uyarı mekanizması kurun."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A01_2021-Broken_Access_Control/",
+            "https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html",
+            "https://cwe.mitre.org/data/definitions/639.html"
+          ]
+        },
+        {
+          "id": "R-FB-01",
+          "name": "Forced Browsing",
+          "cwe": "CWE-425",
+          "description": "Kimlik doğrulaması yapılmadan öngörülebilir URL'lere doğrudan erişilerek korumalı kaynaklara ulaşma.",
+          "indicators": [
+            {
+              "id": "FB-S1",
+              "question": "Giriş yapmadan /admin, /dashboard, /panel gibi yönetim sayfalarına URL ile doğrudan erişebiliyor musun?",
+              "symptom": "Kimlik Doğrulama Zorunluluğu Eksik",
+              "weight": 3
+            },
+            {
+              "id": "FB-S2",
+              "question": "Menüde gizlenmiş (linklenmemiş) sayfalara URL'yi tahmin ederek erişebiliyor musun?",
+              "symptom": "Gizlilik Yoluyla Güvenlik (Güvensiz)",
+              "weight": 3
+            },
+            {
+              "id": "FB-S3",
+              "question": "Uygulama yalnızca UI'da butonları gizleyerek erişimi kısıtlıyor mu (sunucu taraflı kontrol yok)?",
+              "symptom": "İstemci Taraflı Yetkilendirme",
+              "weight": 2
+            },
+            {
+              "id": "FB-S4",
+              "question": "/backup, /old, /.git, /config gibi hassas dizin/dosyalara erişilebiliyor mu?",
+              "symptom": "Hassas Sayfa/Dosya Açığa Çıkması",
+              "weight": 3
+            },
+            {
+              "id": "FB-S5",
+              "question": "Yetkisiz sayfa erişim denemesi loglanıyor mu?",
+              "symptom": "Güvenlik Olay Kaydı Eksikliği",
+              "weight": 1,
+              "inverse": true
+            }
+          ],
+          "threshold": 5,
+          "owasp_ref": "A01:2021",
+          "remediation": [
+            "Tüm korumalı sayfalarda sunucu taraflı kimlik doğrulaması ve yetkilendirme kontrolü uygulayın.",
+            "URL tabanlı erişim kontrolü için merkezi bir güvenlik filtresi (middleware) kullanın.",
+            "Hassas dizinleri ve konfigürasyon dosyalarını web erişiminin dışına alın.",
+            "Dizin listelemeyi (directory listing) sunucu yapılandırmasında devre dışı bırakın.",
+            "Tüm yetkisiz erişim denemelerini loglayın."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A01_2021-Broken_Access_Control/",
+            "https://owasp.org/www-community/attacks/Forced_browsing",
+            "https://cwe.mitre.org/data/definitions/425.html"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A02:2021",
+      "name": "Cryptographic Failures",
+      "severity": "critical",
+      "description": "Hassas verilerin şifreleme olmadan veya zayıf şifreleme ile korunması.",
+      "types": [
+        {
+          "id": "R-CF-01",
+          "name": "Weak Password Hashing",
+          "cwe": "CWE-916",
+          "description": "Şifrelerin MD5, SHA-1 gibi hız odaklı ve kriptografik açıdan yetersiz algoritmalarla hashlenmesi.",
+          "indicators": [
+            {
+              "id": "CF-S1",
+              "question": "Şifreler MD5 veya SHA-1 gibi algoritmalarla hashleniyor mu?",
+              "symptom": "Zayıf Şifreleme Algoritması",
+              "weight": 3
+            },
+            {
+              "id": "CF-S2",
+              "question": "Şifreleme sırasında salt (tuz) değeri kullanılmıyor mu?",
+              "symptom": "Rainbow Table Saldırısına Açıklık",
+              "weight": 2
+            },
+            {
+              "id": "CF-S3",
+              "question": "Şifreler veritabanında düz metin olarak saklanıyor mu?",
+              "symptom": "Şifresiz Saklama",
+              "weight": 3
+            }
+          ],
+          "threshold": 3,
+          "owasp_ref": "A02:2021",
+          "remediation": [
+            "bcrypt, scrypt veya Argon2 kullanın.",
+            "Her şifre için benzersiz, yeterli uzunlukta salt değeri kullanın.",
+            "Mevcut zayıf hashları güvenli formata geçiş planıyla güncelleyin."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A02_2021-Cryptographic_Failures/",
+            "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html"
+          ]
+        },
+        {
+          "id": "R-CF-02",
+          "name": "Sensitive Data in Transit",
+          "cwe": "CWE-319",
+          "description": "Hassas verilerin şifrelenmemiş kanallar üzerinden iletilmesi.",
+          "indicators": [
+            {
+              "id": "CF-S4",
+              "question": "Uygulama HTTP üzerinden hassas veri (şifre, token, kredi kartı) iletiyor mu?",
+              "symptom": "Şifrelenmemiş Veri İletimi",
+              "weight": 3
+            },
+            {
+              "id": "CF-S5",
+              "question": "HSTS header'ı (Strict-Transport-Security) uygulanıyor mu?",
+              "symptom": "Protokol Yükseltme Zorunluluğu Eksikliği",
+              "weight": 2,
+              "inverse": true
+            },
+            {
+              "id": "CF-S6",
+              "question": "TLS sertifikası doğrulaması devre dışı bırakılmış mı?",
+              "symptom": "Sertifika Doğrulama Eksikliği",
+              "weight": 3
+            }
+          ],
+          "threshold": 3,
+          "owasp_ref": "A02:2021",
+          "remediation": [
+            "HTTPS'i zorunlu kılın ve HTTP'yi 301 ile yönlendirin.",
+            "HSTS header'ı ekleyin: Strict-Transport-Security: max-age=31536000; includeSubDomains.",
+            "TLS 1.2 veya üstü kullanın."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A02_2021-Cryptographic_Failures/",
+            "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A03:2021",
+      "name": "Injection",
+      "severity": "critical",
+      "description": "Güvenilmeyen verinin yorumlayıcılara (SQL, OS, LDAP) komut veya sorgu olarak gönderilmesi.",
+      "types": [
+        {
+          "id": "R-SQLI-01",
+          "name": "SQL Injection",
+          "cwe": "CWE-89",
+          "description": "Kullanıcı girdisinin sanitize edilmeden SQL sorgularına dahil edilmesi.",
+          "indicators": [
+            {
+              "id": "SQLI-S1",
+              "question": "Giriş alanına tek tırnak (') yazıldığında SQL sözdizimi hatası (syntax error) alınıyor mu?",
+              "symptom": "Hata Tabanlı SQL Yanıtı",
+              "weight": 3
+            },
+            {
+              "id": "SQLI-S2",
+              "question": "Parameterized query (prepared statement) veya ORM kullanılmıyor mu?",
+              "symptom": "Ham SQL Sorgu Kullanımı",
+              "weight": 3
+            },
+            {
+              "id": "SQLI-S3",
+              "question": "Kullanıcı girdisi string birleştirme ile SQL sorgusuna ekleniyor mu?",
+              "symptom": "String Concatenation ile SQL Oluşturma",
+              "weight": 3
+            },
+            {
+              "id": "SQLI-S4",
+              "question": "1=1 gibi boolean ifadeler eklenince sorgu tüm kayıtları mı döndürüyor?",
+              "symptom": "Boolean Tabanlı SQLi",
+              "weight": 2
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A03:2021",
+          "remediation": [
+            "Tüm sorgularda prepared statement ve parameterized query kullanın.",
+            "Sunucu tarafında whitelist tabanlı giriş doğrulama uygulayın.",
+            "Veritabanı hesabına minimum yetki verin.",
+            "WAF ile SQL injection girişimlerini filtreleyin."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A03_2021-Injection/",
+            "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"
+          ]
+        },
+        {
+          "id": "R-XSS-01",
+          "name": "Cross-Site Scripting (XSS)",
+          "cwe": "CWE-79",
+          "description": "Zararlı script'lerin uygulamaya eklenerek diğer kullanıcıların tarayıcısında çalıştırılması.",
+          "indicators": [
+            {
+              "id": "XSS-S1",
+              "question": "<script>alert(1)</script> gibi bir girdi filtre edilmeden sayfada görüntüleniyor mu?",
+              "symptom": "Çıktı Kodlaması Eksikliği",
+              "weight": 3
+            },
+            {
+              "id": "XSS-S2",
+              "question": "Kullanıcı girdisi HTML/JS olarak encode edilmeden sayfaya yansıtılıyor mu?",
+              "symptom": "Reflected XSS",
+              "weight": 3
+            },
+            {
+              "id": "XSS-S3",
+              "question": "Content-Security-Policy (CSP) header'ı uygulanıyor mu?",
+              "symptom": "CSP Eksikliği",
+              "weight": 2,
+              "inverse": true
+            }
+          ],
+          "threshold": 3,
+          "owasp_ref": "A03:2021",
+          "remediation": [
+            "Tüm kullanıcı girdilerini çıktıya yazarken HTML encode edin.",
+            "Content-Security-Policy header'ı ekleyin.",
+            "Modern framework'lerin otomatik kaçırma özelliklerini kullanın (React, Angular)."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A03_2021-Injection/",
+            "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A05:2021",
+      "name": "Security Misconfiguration",
+      "severity": "high",
+      "description": "Güvenlik ayarlarının hatalı veya eksik yapılandırılması.",
+      "types": [
+        {
+          "id": "R-MC-01",
+          "name": "Exposed Debug Information",
+          "cwe": "CWE-215",
+          "description": "Debug modu veya ayrıntılı hata mesajlarının üretim ortamında açık bırakılması.",
+          "indicators": [
+            {
+              "id": "MC-S1",
+              "question": "Hata sayfalarında stack trace veya dahili yol bilgisi görüntüleniyor mu?",
+              "symptom": "Fazla Bilgi Açıklama",
+              "weight": 3
+            },
+            {
+              "id": "MC-S2",
+              "question": "Üretim ortamında debug modu etkin mi?",
+              "symptom": "Üretimde Debug Modu",
+              "weight": 3
+            },
+            {
+              "id": "MC-S3",
+              "question": "Varsayılan kimlik bilgileri (admin/admin) değiştirilmeden kullanılıyor mu?",
+              "symptom": "Varsayılan Kimlik Bilgileri",
+              "weight": 3
+            },
+            {
+              "id": "MC-S4",
+              "question": "Güvenlik HTTP header'ları (X-Frame-Options, HSTS, CSP) eksik mi?",
+              "symptom": "Eksik Güvenlik Header'ları",
+              "weight": 2
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A05:2021",
+          "remediation": [
+            "Üretimde hata mesajlarını genel tutun, detayları sadece loglayn.",
+            "Debug modunu üretim ortamında devre dışı bırakın.",
+            "Tüm varsayılan kimlik bilgilerini değiştirin.",
+            "Güvenlik header'larını yapılandırın."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
+            "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A07:2021",
+      "name": "Identification and Authentication Failures",
+      "severity": "high",
+      "description": "Kimlik doğrulama ve oturum yönetimindeki zayıflıklar.",
+      "types": [
+        {
+          "id": "R-AUTH-01",
+          "name": "Weak Authentication",
+          "cwe": "CWE-287",
+          "description": "Yetersiz kimlik doğrulama mekanizmaları.",
+          "indicators": [
+            {
+              "id": "AUTH-S1",
+              "question": "Brute-force saldırısına karşı hesap kilitleme veya rate limiting uygulanıyor mu?",
+              "symptom": "Brute-Force Koruması Eksikliği",
+              "weight": 3,
+              "inverse": true
+            },
+            {
+              "id": "AUTH-S2",
+              "question": "Çok faktörlü kimlik doğrulama (MFA) destekleniyor mu?",
+              "symptom": "Tek Faktörlü Kimlik Doğrulama",
+              "weight": 2,
+              "inverse": true
+            },
+            {
+              "id": "AUTH-S3",
+              "question": "Zayıf şifreler (123456, password) sisteme kabul ediliyor mu?",
+              "symptom": "Zayıf Şifre Politikası",
+              "weight": 2
+            },
+            {
+              "id": "AUTH-S4",
+              "question": "Oturum token'ları giriş sonrasında yenileniyor mu?",
+              "symptom": "Session Fixation Riski",
+              "weight": 2,
+              "inverse": true
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A07:2021",
+          "remediation": [
+            "Başarısız giriş denemeleri için rate limiting ve hesap kilitleme uygulayın.",
+            "MFA seçeneği sunun veya zorunlu kılın.",
+            "Güçlü şifre politikası uygulayın (min 12 karakter).",
+            "Giriş sonrasında yeni oturum ID'si oluşturun."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/",
+            "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+          ]
+        }
+      ]
+    }
+  ]
 }
