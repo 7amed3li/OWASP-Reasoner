@@ -1,0 +1,126 @@
+.qcard {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    transition: var(--transition);
+}
+
+.qcard:hover {
+    border-color: var(--border-bright);
+    background: var(--bg-card-hover);
+}
+
+.qcard-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.qcard-type-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent-cyan);
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    padding: 3px 10px;
+    border-radius: 6px;
+}
+
+.qcard-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.qcard-question {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.65;
+    margin-bottom: 16px;
+}
+
+.qcard-symptom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.symptom-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.symptom-value {
+    font-size: 0.8rem;
+    color: var(--accent-purple);
+    font-weight: 600;
+    flex: 1;
+}
+
+.symptom-weight {
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+}
+
+.qcard-answers {
+    display: flex;
+    gap: 12px;
+}
+
+.answer-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.answer-btn:hover {
+    border-color: var(--border-bright);
+    color: var(--text-primary);
+}
+
+.answer-yes.selected {
+    background: rgba(0, 255, 136, 0.12);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
+.answer-no.selected {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: var(--severity-critical);
+    color: var(--severity-critical);
+}
+
+.answer-skip.selected {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--border-bright);
+    color: var(--text-secondary);
+}
+
+.answer-icon {
+    font-size: 1rem;
+}
