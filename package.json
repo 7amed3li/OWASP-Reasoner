@@ -1,0 +1,12 @@
+{
+  "name": "owasp-expert-system",
+  "version": "1.0.0",
+  "description": "Unified workflow for OWASP Expert System",
+  "scripts": {
+    "postinstall": "npm install --prefix backend && npm install --prefix frontend",
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm start --prefix frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
