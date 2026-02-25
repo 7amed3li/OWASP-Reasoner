@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 const corsOptions = process.env.ALLOWED_ORIGINS 
     ? { origin: process.env.ALLOWED_ORIGINS.split(','), credentials: true }
-    : {}; // Varsayılan olarak tüm kaynaklara izin verir
+    : { origin: false };
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '100kb' }));
 
