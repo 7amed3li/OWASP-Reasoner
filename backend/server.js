@@ -1,13 +1,14 @@
 const express = require('express');
 const cors = require('cors');
-const { OWASPInferenceEngine } = require('./src/engine');
+const OWASPInferenceEngine = require('./src/engine');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*';
+app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(express.json({ limit: '100kb' }));
 
 // Initialize Inference Engine
 const engine = new OWASPInferenceEngine();
@@ -51,8 +52,17 @@ app.post('/api/evaluate', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     console.log(`- GET  /api/questions : To fetch all diagnostic questions`);
     console.log(`- POST /api/evaluate  : To submit answers and get a diagnosis report`);
+});
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`Error: Port ${PORT} is already in use.`);
+    } else {
+        console.error(`Server failed to start:`, err);
+    }
+    process.exit(1);
 });

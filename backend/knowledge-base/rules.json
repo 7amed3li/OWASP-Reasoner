@@ -163,19 +163,19 @@
           "description": "Uygulamanın kaynak kodunda veya konfigürasyon dosyalarında sabit (hard-coded) şifrelerin kullanılması.",
           "indicators": [
             {
-              "id": "CF-S4",
+              "id": "CF02-S1",
               "question": "Kaynak kodunda veritabanı veya API bağlantıları için şifreler açıkça (plain text) yazılmış mı?",
               "symptom": "Koda Gömülü Şifre",
               "weight": 4
             },
             {
-              "id": "CF-S5",
+              "id": "CF02-S2",
               "question": "Github gibi versiyon kontrol sistemlerine şifre içeren dosyalar (örn: .env) commit ediliyor mu?",
               "symptom": "Repo Sızıntısı",
               "weight": 3
             },
             {
-              "id": "CF-S6",
+              "id": "CF02-S3",
               "question": "Uygulama derlenmiş (compiled) olsa bile tersine mühendislik ile şifrelere ulaşılabiliyor mu?",
               "symptom": "Derlenmiş Dosya İçinde Şifre",
               "weight": 3
@@ -200,13 +200,13 @@
           "description": "Kriptografik anahtarların, token'ların veya oturum ID'lerinin yeterli rastgelelikte (entropy) üretilmemesi.",
           "indicators": [
             {
-              "id": "CF-S7",
+              "id": "CF03-S1",
               "question": "Şifre sıfırlama token'ları Math.random() gibi tahmin edilebilir/kriptografik olmayan fonksiyonlarla mı üretiliyor?",
               "symptom": "Zayıf Rastgele Sayı Üretici (PRNG) Kullanımı",
               "weight": 4
             },
             {
-              "id": "CF-S8",
+              "id": "CF03-S2",
               "question": "Session ID'ler sıralı sayılar, zaman damgaları (timestamp) veya kullanıcının e-postası gibi tahmin edilebilir veriler mi içeriyor?",
               "symptom": "Tahmin Edilebilir Token",
               "weight": 3
@@ -385,6 +385,53 @@
       ]
     },
     {
+      "id": "A04:2021",
+      "name": "Insecure Design",
+      "severity": "high",
+      "description": "Risk profilinin yetersiz belirlenmesi veya sistem tasarımındaki temel güvenlik mimarisi eksiklikleri.",
+      "types": [
+        {
+          "id": "R-ID-01",
+          "name": "Missing Threat Modeling",
+          "cwe": "CWE-1008",
+          "description": "Uygulama tasarlanırken tehdit modellemesi yapılmamış olması.",
+          "indicators": [
+            {
+              "id": "ID-S1",
+              "question": "Proje başlangıcında güvenlik gereksinimleri ve tehdit analizi dokümante edildi mi?",
+              "symptom": "Güvenlik İsterleri Eksik",
+              "weight": 3,
+              "inverse": true
+            },
+            {
+              "id": "ID-S2",
+              "question": "İş mantığı (business logic) hatalarına karşı (örn: e-ticaret sepetinde eksi fiyat girmek) koruma var mı?",
+              "symptom": "İş Mantığı Zafiyeti",
+              "weight": 3,
+              "inverse": true
+            },
+            {
+              "id": "ID-S3",
+              "question": "Kritik işlemler (örn: şifre sıfırlama, para transferi) adım adım onay gerektiriyor mu?",
+              "symptom": "Eksik İşlem Onayı",
+              "weight": 2,
+              "inverse": true
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A04:2021",
+          "remediation": [
+            "Yazılım geliştirme yaşam döngüsünün (SDLC) en başında tehdit modellemesi yapın.",
+            "Güvenli tasarım prensiplerini bütçelendirme ve mimari planlama aşamasında belirleyin.",
+            "Birim ve entegrasyon testlerine iş mantığı senaryolarını dahil edin."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A04_2021-Insecure_Design/"
+          ]
+        }
+      ]
+    },
+    {
       "id": "A05:2021",
       "name": "Security Misconfiguration",
       "severity": "high",
@@ -492,6 +539,52 @@
           "references": [
             "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
             "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A06:2021",
+      "name": "Vulnerable and Outdated Components",
+      "severity": "medium",
+      "description": "Bilinen zafiyetlere sahip veya güncel olmayan yazılım bileşenlerinin (kütüphaneler, frameworkler) kullanılması.",
+      "types": [
+        {
+          "id": "R-VOC-01",
+          "name": "Using Components with Known Vulnerabilities",
+          "cwe": "CWE-1104",
+          "description": "Güvenlik açığı barındıran eklenti, paket veya işletim sistemlerinin kullanımı.",
+          "indicators": [
+            {
+              "id": "VOC-S1",
+              "question": "Projede kullanılan dış kütüphanelerin (npm, pip, maven) sürümleri düzenli kontrol ediliyor mu?",
+              "symptom": "Versiyon Takibi Eksik",
+              "weight": 3,
+              "inverse": true
+            },
+            {
+              "id": "VOC-S2",
+              "question": "Artık desteklenmeyen (End-of-Life) platformlar (örn: PHP 5, eski Node.js sürümleri) çalıştırılıyor mu?",
+              "symptom": "Desteklenmeyen Yazılım Kullanımı",
+              "weight": 4
+            },
+            {
+              "id": "VOC-S3",
+              "question": "Geliştirme ekibi, bağımlılıklardaki zafiyetleri gösteren (SCA) araçlar (örn: npm audit, Snyk) kullanıyor mu?",
+              "symptom": "Otomatik Bağımlılık Taraması Yok",
+              "weight": 2,
+              "inverse": true
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A06:2021",
+          "remediation": [
+            "Kullanılmayan modülleri, özellikleri ve dosyaları sistemden kaldırın.",
+            "Bileşen sürümlerini bir envanter (BOM) aracı ile sürekli takip edin.",
+            "Güvenlik yamalarını hızlıca uygulayacak CI/CD süreçleri kurun."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components/"
           ]
         }
       ]
@@ -613,99 +706,6 @@
       ]
     },
     {
-      "id": "A04:2021",
-      "name": "Insecure Design",
-      "severity": "high",
-      "description": "Risk profilinin yetersiz belirlenmesi veya sistem tasarımındaki temel güvenlik mimarisi eksiklikleri.",
-      "types": [
-        {
-          "id": "R-ID-01",
-          "name": "Missing Threat Modeling",
-          "cwe": "CWE-1008",
-          "description": "Uygulama tasarlanırken tehdit modellemesi yapılmamış olması.",
-          "indicators": [
-            {
-              "id": "ID-S1",
-              "question": "Proje başlangıcında güvenlik gereksinimleri ve tehdit analizi dokümante edildi mi?",
-              "symptom": "Güvenlik İsterleri Eksik",
-              "weight": 3,
-              "inverse": true
-            },
-            {
-              "id": "ID-S2",
-              "question": "İş mantığı (business logic) hatalarına karşı (örn: e-ticaret sepetinde eksi fiyat girmek) koruma var mı?",
-              "symptom": "İş Mantığı Zafiyeti",
-              "weight": 3,
-              "inverse": true
-            },
-            {
-              "id": "ID-S3",
-              "question": "Kritik işlemler (örn: şifre sıfırlama, para transferi) adım adım onay gerektiriyor mu?",
-              "symptom": "Eksik İşlem Onayı",
-              "weight": 2,
-              "inverse": true
-            }
-          ],
-          "threshold": 4,
-          "owasp_ref": "A04:2021",
-          "remediation": [
-            "Yazılım geliştirme yaşam döngüsünün (SDLC) en başında tehdit modellemesi yapın.",
-            "Güvenli tasarım prensiplerini bütçelendirme ve mimari planlama aşamasında belirleyin.",
-            "Birim ve entegrasyon testlerine iş mantığı senaryolarını dahil edin."
-          ],
-          "references": [
-            "https://owasp.org/Top10/A04_2021-Insecure_Design/"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "A06:2021",
-      "name": "Vulnerable and Outdated Components",
-      "severity": "medium",
-      "description": "Bilinen zafiyetlere sahip veya güncel olmayan yazılım bileşenlerinin (kütüphaneler, frameworkler) kullanılması.",
-      "types": [
-        {
-          "id": "R-VOC-01",
-          "name": "Using Components with Known Vulnerabilities",
-          "cwe": "CWE-1104",
-          "description": "Güvenlik açığı barındıran eklenti, paket veya işletim sistemlerinin kullanımı.",
-          "indicators": [
-            {
-              "id": "VOC-S1",
-              "question": "Projede kullanılan dış kütüphanelerin (npm, pip, maven) sürümleri düzenli kontrol ediliyor mu?",
-              "symptom": "Versiyon Takibi Eksik",
-              "weight": 3,
-              "inverse": true
-            },
-            {
-              "id": "VOC-S2",
-              "question": "Artık desteklenmeyen (End-of-Life) platformlar (örn: PHP 5, eski Node.js sürümleri) çalıştırılıyor mu?",
-              "symptom": "Desteklenmeyen Yazılım Kullanımı",
-              "weight": 4
-            },
-            {
-              "id": "VOC-S3",
-              "question": "Geliştirme ekibi, bağımlılıklardaki zafiyetleri gösteren (SCA) araçlar (örn: npm audit, Snyk) kullanıyor mu?",
-              "symptom": "Otomatik Bağımlılık Taraması Yok",
-              "weight": 2,
-              "inverse": true
-            }
-          ],
-          "threshold": 4,
-          "owasp_ref": "A06:2021",
-          "remediation": [
-            "Kullanılmayan modülleri, özellikleri ve dosyaları sistemden kaldırın.",
-            "Bileşen sürümlerini bir envanter (BOM) aracı ile sürekli takip edin.",
-            "Güvenlik yamalarını hızlıca uygulayacak CI/CD süreçleri kurun."
-          ],
-          "references": [
-            "https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components/"
-          ]
-        }
-      ]
-    },
-    {
       "id": "A08:2021",
       "name": "Software and Data Integrity Failures",
       "severity": "high",
@@ -732,7 +732,7 @@
             },
             {
               "id": "SDI-S3",
-              "question": "CI/CD süreçleri (örn: GitHub Actions, Jenkins) üzerinde kod incelenmeden doğrudan üretim ortamına değıtım yapılabiliyor mu?",
+              "question": "CI/CD süreçleri (örn: GitHub Actions, Jenkins) üzerinde kod incelenmeden doğrudan üretim ortamına dağıtım yapılabiliyor mu?",
               "symptom": "Güvensiz CI/CD Pipeline",
               "weight": 2
             }
