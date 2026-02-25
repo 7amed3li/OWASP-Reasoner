@@ -158,6 +158,73 @@
         },
         {
           "id": "R-CF-02",
+          "name": "Use of Hard-coded Password",
+          "cwe": "CWE-259",
+          "description": "Uygulamanın kaynak kodunda veya konfigürasyon dosyalarında sabit (hard-coded) şifrelerin kullanılması.",
+          "indicators": [
+            {
+              "id": "CF-S4",
+              "question": "Kaynak kodunda veritabanı veya API bağlantıları için şifreler açıkça (plain text) yazılmış mı?",
+              "symptom": "Koda Gömülü Şifre",
+              "weight": 4
+            },
+            {
+              "id": "CF-S5",
+              "question": "Github gibi versiyon kontrol sistemlerine şifre içeren dosyalar (örn: .env) commit ediliyor mu?",
+              "symptom": "Repo Sızıntısı",
+              "weight": 3
+            },
+            {
+              "id": "CF-S6",
+              "question": "Uygulama derlenmiş (compiled) olsa bile tersine mühendislik ile şifrelere ulaşılabiliyor mu?",
+              "symptom": "Derlenmiş Dosya İçinde Şifre",
+              "weight": 3
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A02:2021",
+          "remediation": [
+            "Şifreleri ve anahtarları ortam değişkenlerinde (Environment Variables) veya güvenli Vault sistemlerinde saklayın.",
+            "Git reposuna hassas dosyaları eklememek için .gitignore kullanın.",
+            "Kod tarama araçları ile hard-coded şifreleri tespit edin."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A02_2021-Cryptographic_Failures/",
+            "https://cwe.mitre.org/data/definitions/259.html"
+          ]
+        },
+        {
+          "id": "R-CF-03",
+          "name": "Insufficient Entropy",
+          "cwe": "CWE-331",
+          "description": "Kriptografik anahtarların, token'ların veya oturum ID'lerinin yeterli rastgelelikte (entropy) üretilmemesi.",
+          "indicators": [
+            {
+              "id": "CF-S7",
+              "question": "Şifre sıfırlama token'ları Math.random() gibi tahmin edilebilir/kriptografik olmayan fonksiyonlarla mı üretiliyor?",
+              "symptom": "Zayıf Rastgele Sayı Üretici (PRNG) Kullanımı",
+              "weight": 4
+            },
+            {
+              "id": "CF-S8",
+              "question": "Session ID'ler sıralı sayılar, zaman damgaları (timestamp) veya kullanıcının e-postası gibi tahmin edilebilir veriler mi içeriyor?",
+              "symptom": "Tahmin Edilebilir Token",
+              "weight": 3
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A02:2021",
+          "remediation": [
+            "Anahtarları ve token'ları her zaman kriptografik olarak güvenli pseudo rastgele sayı üreteçleri (CSPRNG) ile üretin.",
+            "Node.js kullanıyorsanız 'crypto.randomBytes()' veya benzeri güvenilir modüller kullanın."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A02_2021-Cryptographic_Failures/",
+            "https://cwe.mitre.org/data/definitions/331.html"
+          ]
+        },
+        {
+          "id": "R-CF-04",
           "name": "Sensitive Data in Transit",
           "cwe": "CWE-319",
           "description": "Hassas verilerin şifrelenmemiş kanallar üzerinden iletilmesi.",
@@ -202,6 +269,37 @@
       "severity": "critical",
       "description": "Güvenilmeyen verinin yorumlayıcılara (SQL, OS, LDAP) komut veya sorgu olarak gönderilmesi.",
       "types": [
+        {
+          "id": "R-CMD-01",
+          "name": "OS Command Injection",
+          "cwe": "CWE-78",
+          "description": "Kullanıcı girdisinin doğrudan işletim sistemi komutlarına dahil edilmesi, saldırganın sunucuda keyfi komut çalıştırmasına olanak tanır.",
+          "indicators": [
+            {
+              "id": "CMD-S1",
+              "question": "Uygulama, ping, nslookup gibi sistem araçlarını çağırırken kullanıcı girdisini (örn: IP adresi) komut satırına parametre olarak ekliyor mu?",
+              "symptom": "Güvensiz İşletim Sistemi Çağrısı",
+              "weight": 4
+            },
+            {
+              "id": "CMD-S2",
+              "question": "Kullanıcı girdisine noktalı virgül (;), pipe (|) veya ampersand (&&) eklendiğinde beklenen komuttan farklı bir çıktı/hata alınıyor mu?",
+              "symptom": "Komut Zehirlenmesi / Zincirleme Başarılı",
+              "weight": 4
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A03:2021",
+          "remediation": [
+            "İşletim sistemi komutlarını doğrudan çağırmaktan (exec, system, passthru) kaçının.",
+            "Bunun yerine programlama dilinin yerleşik kütüphanelerini (built-in APIs) kullanın.",
+            "Kaçınılmaz durumlarda, argümanları kesinlikle ayrıştırın (örn: execFile kullanımı) ve güçlü bir whitelist doğrulamasından geçirin."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A03_2021-Injection/",
+            "https://cwe.mitre.org/data/definitions/78.html"
+          ]
+        },
         {
           "id": "R-SQLI-01",
           "name": "SQL Injection",
@@ -335,6 +433,66 @@
             "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
             "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html"
           ]
+        },
+        {
+          "id": "R-MC-02",
+          "name": "Configuration",
+          "cwe": "CWE-16",
+          "description": "Yazılım çerçevesi, uygulama sunucusu, web sunucusu, veritabanı sunucusu veya işletim sistemi varsayılan ayarlarla bırakılması.",
+          "indicators": [
+            {
+              "id": "MC-S5",
+              "question": "Sunucu yazılımı (Apache, Nginx, Tomcat vb.) varsayılan konfigürasyonu ile mi çalışıyor?",
+              "symptom": "Varsayılan Sunucu Yapılandırması",
+              "weight": 3
+            },
+            {
+              "id": "MC-S6",
+              "question": "Kullanılmayan gereksiz portlar, servisler veya özellikler (örn: dışa açık veritabanı portları) sistemde aktif mi?",
+              "symptom": "Gereksiz Servis İfşası",
+              "weight": 3
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A05:2021",
+          "remediation": [
+            "Güvenli yapılandırma süreçleri oluşturun (hardening guidelines) ve tüm yeni ortamlara otomatik uygulayın.",
+            "Kullanılmayan tüm özellikleri ve servisleri kapatın."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
+            "https://cwe.mitre.org/data/definitions/16.html"
+          ]
+        },
+        {
+          "id": "R-MC-03",
+          "name": "XML External Entities (XXE)",
+          "cwe": "CWE-611",
+          "description": "Zayıf yapılandırılmış XML parser'ların, dış varlıkları (external entities) çözümlemesine izin vermesi.",
+          "indicators": [
+            {
+              "id": "MC-S7",
+              "question": "Uygulama dışarıdan XML verisi kabul ediyor mu ve bu veri bir parser (DOM, SAX) tarafından işleniyor mu?",
+              "symptom": "XML Veri İşleme Mevcut",
+              "weight": 2
+            },
+            {
+              "id": "MC-S8",
+              "question": "XML yüküne (payload) '<!ENTITY xxe SYSTEM \"file:///etc/passwd\">' eklendiğinde sistemden dosya okunabiliyor mu?",
+              "symptom": "Başarılı XXE Okuması",
+              "weight": 4
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A05:2021",
+          "remediation": [
+            "Mümkünse XML yerine JSON kullanın.",
+            "Tüm XML parser'larında 'External Entities' (Dış Varlıklar) ve DTD (Document Type Definition) işlemeyi tamamen kapatın."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
+            "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
+          ]
         }
       ]
     },
@@ -389,6 +547,297 @@
           "references": [
             "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/",
             "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+          ]
+        },
+        {
+          "id": "R-AUTH-02",
+          "name": "Session Fixation",
+          "cwe": "CWE-384",
+          "description": "Kullanıcının kimlik doğrulamadan önce belirlenen oturum kimliği (Session ID) ile sistemi kullanmaya devam etmesi.",
+          "indicators": [
+            {
+              "id": "AUTH-S5",
+              "question": "Kullanıcı giriş (login) yaptıktan sonra Session ID değeri (cookie veya token) değişiyor mu?",
+              "symptom": "Giriş Sonrası Session ID Sabitliği",
+              "weight": 4,
+              "inverse": true
+            },
+            {
+              "id": "AUTH-S6",
+              "question": "URL üzerinden (örn: ?PHPSESSID=1234) önceden belirlenmiş bir session cookie'si enjekte edilebiliyor mu?",
+              "symptom": "URL Tabanlı Session Enjeksiyonu",
+              "weight": 3
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A07:2021",
+          "remediation": [
+            "Kullanıcı başarıyla giriş yaptığında her zaman yeni bir Session ID oluşturun (Session Regeneration).",
+            "Session ID'leri sadece güvenli (HTTPOnly ve Secure bayraklı) cookie'ler üzerinden iletin, URL'de taşımayın."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/",
+            "https://owasp.org/www-community/attacks/Session_fixation"
+          ]
+        },
+        {
+          "id": "R-AUTH-03",
+          "name": "Weak Password Recovery Mechanism",
+          "cwe": "CWE-640",
+          "description": "Şifremi unuttum / kurtarma süreçlerinin tahmin edilebilir veya atlatılabilir olması.",
+          "indicators": [
+            {
+              "id": "AUTH-S7",
+              "question": "Şifre sıfırlama linkleri (veya kodları) süresiz mi veya çok uzun süre mi (örn: 24 saatten fazla) geçerli kalıyor?",
+              "symptom": "Uzun Ömürlü Kurtarma Token'ı",
+              "weight": 3
+            },
+            {
+              "id": "AUTH-S8",
+              "question": "Şifre kurtarma işleminde 'Annenizin kızlık soyadı nedir?' gibi gizli olmayan ve kolay bulunabilir güvenlik soruları kullanılıyor mu?",
+              "symptom": "Zayıf Güvenlik Sorusu (KBA)",
+              "weight": 3
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A07:2021",
+          "remediation": [
+            "Şifre sıfırlama token'larını kısa ömürlü (örn: 15-30 dakika) ve tek kullanımlık yapın.",
+            "Güvenlik soruları (KBA - Knowledge Based Authentication) yerine her zaman e-posta veya SMS ile gönderilen rastgele kodları tercih edin."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/",
+            "https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A04:2021",
+      "name": "Insecure Design",
+      "severity": "high",
+      "description": "Risk profilinin yetersiz belirlenmesi veya sistem tasarımındaki temel güvenlik mimarisi eksiklikleri.",
+      "types": [
+        {
+          "id": "R-ID-01",
+          "name": "Missing Threat Modeling",
+          "cwe": "CWE-1008",
+          "description": "Uygulama tasarlanırken tehdit modellemesi yapılmamış olması.",
+          "indicators": [
+            {
+              "id": "ID-S1",
+              "question": "Proje başlangıcında güvenlik gereksinimleri ve tehdit analizi dokümante edildi mi?",
+              "symptom": "Güvenlik İsterleri Eksik",
+              "weight": 3,
+              "inverse": true
+            },
+            {
+              "id": "ID-S2",
+              "question": "İş mantığı (business logic) hatalarına karşı (örn: e-ticaret sepetinde eksi fiyat girmek) koruma var mı?",
+              "symptom": "İş Mantığı Zafiyeti",
+              "weight": 3,
+              "inverse": true
+            },
+            {
+              "id": "ID-S3",
+              "question": "Kritik işlemler (örn: şifre sıfırlama, para transferi) adım adım onay gerektiriyor mu?",
+              "symptom": "Eksik İşlem Onayı",
+              "weight": 2,
+              "inverse": true
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A04:2021",
+          "remediation": [
+            "Yazılım geliştirme yaşam döngüsünün (SDLC) en başında tehdit modellemesi yapın.",
+            "Güvenli tasarım prensiplerini bütçelendirme ve mimari planlama aşamasında belirleyin.",
+            "Birim ve entegrasyon testlerine iş mantığı senaryolarını dahil edin."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A04_2021-Insecure_Design/"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A06:2021",
+      "name": "Vulnerable and Outdated Components",
+      "severity": "medium",
+      "description": "Bilinen zafiyetlere sahip veya güncel olmayan yazılım bileşenlerinin (kütüphaneler, frameworkler) kullanılması.",
+      "types": [
+        {
+          "id": "R-VOC-01",
+          "name": "Using Components with Known Vulnerabilities",
+          "cwe": "CWE-1104",
+          "description": "Güvenlik açığı barındıran eklenti, paket veya işletim sistemlerinin kullanımı.",
+          "indicators": [
+            {
+              "id": "VOC-S1",
+              "question": "Projede kullanılan dış kütüphanelerin (npm, pip, maven) sürümleri düzenli kontrol ediliyor mu?",
+              "symptom": "Versiyon Takibi Eksik",
+              "weight": 3,
+              "inverse": true
+            },
+            {
+              "id": "VOC-S2",
+              "question": "Artık desteklenmeyen (End-of-Life) platformlar (örn: PHP 5, eski Node.js sürümleri) çalıştırılıyor mu?",
+              "symptom": "Desteklenmeyen Yazılım Kullanımı",
+              "weight": 4
+            },
+            {
+              "id": "VOC-S3",
+              "question": "Geliştirme ekibi, bağımlılıklardaki zafiyetleri gösteren (SCA) araçlar (örn: npm audit, Snyk) kullanıyor mu?",
+              "symptom": "Otomatik Bağımlılık Taraması Yok",
+              "weight": 2,
+              "inverse": true
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A06:2021",
+          "remediation": [
+            "Kullanılmayan modülleri, özellikleri ve dosyaları sistemden kaldırın.",
+            "Bileşen sürümlerini bir envanter (BOM) aracı ile sürekli takip edin.",
+            "Güvenlik yamalarını hızlıca uygulayacak CI/CD süreçleri kurun."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components/"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A08:2021",
+      "name": "Software and Data Integrity Failures",
+      "severity": "high",
+      "description": "Yazılım güncellemelerinin, kritik verilerin veya CI/CD zincirinin doğrulanamaması.",
+      "types": [
+        {
+          "id": "R-SDI-01",
+          "name": "Insecure CI/CD ve Deserialization",
+          "cwe": "CWE-829",
+          "description": "Kaynağı belirsiz verilerin deserializasyonu veya güvenilmeyen repolardan paket çekilmesi.",
+          "indicators": [
+            {
+              "id": "SDI-S1",
+              "question": "Kullanıcıdan gelen serialize edilmiş veriler (örn: Java Object, Python Pickle) kontrol edilmeden deserialize ediliyor mu?",
+              "symptom": "Güvensiz Deserializasyon (Insecure Deserialization)",
+              "weight": 4
+            },
+            {
+              "id": "SDI-S2",
+              "question": "Uygulama, kendi otomatik güncellemelerini indirirken dijital imza (digital signature) doğrulaması yapıyor mu?",
+              "symptom": "İmzasız Güncelleme",
+              "weight": 3,
+              "inverse": true
+            },
+            {
+              "id": "SDI-S3",
+              "question": "CI/CD süreçleri (örn: GitHub Actions, Jenkins) üzerinde kod incelenmeden doğrudan üretim ortamına değıtım yapılabiliyor mu?",
+              "symptom": "Güvensiz CI/CD Pipeline",
+              "weight": 2
+            }
+          ],
+          "threshold": 5,
+          "owasp_ref": "A08:2021",
+          "remediation": [
+            "Güvenilmeyen kaynaklardan alınan verileri deserialize etmeyin; bunun yerine JSON gibi saf veri formatları kullanın.",
+            "Tüm yazılım güncellemelerinde bütünlük (hash) ve dijital imza doğrulaması yapın.",
+            "SCA (Software Composition Analysis) araçlarını CI/CD süreçlerinize entegre edin."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A08_2021-Software_and_Data_Integrity_Failures/"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A09:2021",
+      "name": "Security Logging and Monitoring Failures",
+      "severity": "medium",
+      "description": "Sistemdeki güvenlik olaylarının yeterince izlenmemesi ve loglanmaması, bu nedenle saldırıların geç fark edilmesi.",
+      "types": [
+        {
+          "id": "R-LOG-01",
+          "name": "Insufficient Logging",
+          "cwe": "CWE-778",
+          "description": "Kritik işlemlerin, hataların ve yetkilendirme başarısızlıklarının kayıt altına alınmaması.",
+          "indicators": [
+            {
+              "id": "LOG-S1",
+              "question": "Başarılı ve başarısız giriş denemeleri, şifre değişiklikleri loglanıyor mu?",
+              "symptom": "Otantikasyon Loglaması Eksik",
+              "weight": 3,
+              "inverse": true
+            },
+            {
+              "id": "LOG-S2",
+              "question": "Sunucudaki log kayıtları merkezi bir sistemde (ayrı bir log sunucusunda) toplanıyor mu?",
+              "symptom": "Lokalize Log Saklama Riski",
+              "weight": 2,
+              "inverse": true
+            },
+            {
+              "id": "LOG-S3",
+              "question": "Uygulamada şüpheli bir aktivite olduğunda sistem yöneticilerine otomatik uyarı/alarm gidiyor mu?",
+              "symptom": "Aktif Uyarı (Alerting) Mekanizması Yok",
+              "weight": 3,
+              "inverse": true
+            }
+          ],
+          "threshold": 4,
+          "owasp_ref": "A09:2021",
+          "remediation": [
+            "Kritik olayların (login, para transferi, yetkilendirme hatası) standart bir formatta loglanmasını sağlayın.",
+            "Logları merkezi güvenli bir sunucuda (örn: ELK stack) toplayın.",
+            "Anomali tespiti durumlarında erken uyarı üretecek eşikler belirleyin."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "A10:2021",
+      "name": "Server-Side Request Forgery (SSRF)",
+      "severity": "high",
+      "description": "Sunucunun, kullanıcının belirttiği bir URL'ye istek atması ve bu isteğin hedefini doğrulamaması.",
+      "types": [
+        {
+          "id": "R-SSRF-01",
+          "name": "SSRF",
+          "cwe": "CWE-918",
+          "description": "Dışarıya yapılan URL isteklerinde girdi kontrolünün olmaması sebebiyle iç ağdaki (localhost/intranet) cihazlara erişim sağlanması.",
+          "indicators": [
+            {
+              "id": "SSRF-S1",
+              "question": "Uygulama, kullanıcıdan bir URL alıp doğrudan o URL'ye istek atıyor mu? (Örn: /fetch?url=http://example.com)",
+              "symptom": "Kullanıcı Tabanlı URL Fetching",
+              "weight": 3
+            },
+            {
+              "id": "SSRF-S2",
+              "question": "Kullanıcının girdiği URL'de 'localhost', '127.0.0.1' veya AWS Meta-Data IP'si ('169.254.169.254') engellenmiş mi?",
+              "symptom": "İç Ağ İstek Kontrolü Eksikliği",
+              "weight": 3,
+              "inverse": true
+            },
+            {
+              "id": "SSRF-S3",
+              "question": "Aynı url fetch mantığını kullanarak sunucunun AWS IAM anahtarları gibi bulut sunucu meta verilerini çekebildiğini tespit ettiniz mi?",
+              "symptom": "Bulut Meta Veri Sızıntısı",
+              "weight": 4
+            }
+          ],
+          "threshold": 5,
+          "owasp_ref": "A10:2021",
+          "remediation": [
+            "İstek atılacak URL'leri katı bir allowlist (beyaz liste) ile sınırlandırın.",
+            "Sunucudan sadece HTTP/HTTPS protokollerine izin verin (file://, ftp:// engelleyin).",
+            "SSRFi engellemek için iç ağ IP'lerine (10.0.0.0/8, 127.0.0.1) yönlendirilecek istekleri uygulama veya ağ seviyesinde engelleyin."
+          ],
+          "references": [
+            "https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/"
           ]
         }
       ]
