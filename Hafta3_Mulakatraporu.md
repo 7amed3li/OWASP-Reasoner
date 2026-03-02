@@ -49,7 +49,7 @@ Yapısal olmayan mülakatlar, bilgi mühendisinin konuşma akışını katı bir
 
 **Furkan Yapıcı:** Peki hangi açıklar en yaygın ve en tehlikeli?
 
-**Hamed Mohamed:** 2021 listesine göre birinci sırada **Broken Access Control (A01:2021)** var. Yani bir kullanıcının erişmemesi gereken başka bir kullanıcının verilerine veya işlevlere erişebilmesi. En basit ve en sık karşılaştığım vakası **IDOR** — Insecure Direct Object Reference. Mesela URL'de `/profile?id=42` yazıyor; saldırgan bunu `id=43` yapıyor ve başka birinin profilini görüyor. Neden tehlikeli? Çünkü sunucu tarafında sahiplik doğrulaması yapılmıyor. Sistemimizde bu için özel bir kural var: `R-IDOR-01`.
+**Hamed Mohamed:** 2021 listesine göre birinci sırada **Broken Access Control (A01:2021)** var. Yani bir kullanıcının erişmemesi gereken başka bir kullanıcının verilerine veya işlevlere erişebilmesi. En basit ve en sık karşılaştığım vakası **IDOR** — Insecure Direct Object Reference. Mesela URL'de `/profile?id=42` yazıyor; saldırgan bunu `id=43` yapıyor ve başka birinin profilini görüyor. Neden tehlikeli? Çünkü sunucu tarafında sahiplik doğrulaması yapılmıyor. Sistemimizde bunun için özel bir kural var: `R-IDOR-01`.
 
 ---
 
@@ -166,7 +166,7 @@ Yapısal olmayan mülakatlar, bilgi mühendisinin konuşma akışını katı bir
 
 ---
 
-### 4.3 Örtük Bilgiler (Tacit Knowledge)
+### 4.2 Örtük Bilgiler (Tacit Knowledge)
 
 Mülakatın serbest akışında uzmanın doğrudan söylemeden aktardığı sezgisel bilgiler:
 
