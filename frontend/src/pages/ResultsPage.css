@@ -79,6 +79,12 @@
     margin-bottom: 48px;
 }
 
+.findings-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
 .findings-list {
     display: flex;
     flex-direction: column;
@@ -98,6 +104,16 @@
     margin-bottom: 20px;
     gap: 16px;
     flex-wrap: wrap;
+    cursor: pointer;
+    user-select: none;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+    padding: 4px;
+    margin: -4px -4px 16px -4px;
+}
+
+.finding-header:hover {
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .finding-id {
@@ -117,6 +133,14 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.finding-toggle {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
 }
 
 .finding-type-count {
@@ -346,9 +370,52 @@
     padding-top: 20px;
 }
 
+.footer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
 .footer-note {
-    margin-top: 12px;
     font-size: 0.78rem;
     color: var(--text-muted);
     font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Print — Rapor yazdırma — */
+@media print {
+    body {
+        background: #fff !important;
+        color: #111 !important;
+    }
+
+    .header,
+    .footer-actions,
+    .findings-hint,
+    .results-footer .btn {
+        display: none !important;
+    }
+
+    .finding-card,
+    .rule-type-card,
+    .risk-summary,
+    .safe-card {
+        background: #f8f8f8 !important;
+        border-color: #ccc !important;
+        box-shadow: none !important;
+    }
+
+    .finding-types {
+        display: block !important;
+    }
+
+    .risk-level,
+    .rs-num,
+    .rt-id,
+    .stat-num {
+        -webkit-text-fill-color: unset !important;
+    }
 }
