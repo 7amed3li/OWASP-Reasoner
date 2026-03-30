@@ -10,6 +10,10 @@ Bu belge iki bölüme ayrılmıştır:
 ---
 
 ## 1. 5 Zafiyet İçin Birleşik Ana Şema (High-Level Combined Tree)
+Bu şema, çıkarım motorunun (Inference Engine) genel çalışma akışının bir alt kümesini göstermektedir.
+
+![Combined Decision Tree Flow](docs/decision-trees/01_combined_flow.png)
+
 Bu şema, çıkarım motorunun (Inference Engine) tüm kategorileri değerlendirmek için izlediği ana yolu (Main Flow) göstermektedir.
 
 ```mermaid
