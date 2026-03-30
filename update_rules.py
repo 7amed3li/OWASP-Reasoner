@@ -1,7 +1,8 @@
 import json
 import os
 
-data_path = r'c:\Users\MOAyman\Desktop\project\OWASP-Reasoner\backend\knowledge-base\rules.json'
+base_dir = os.path.dirname(os.path.abspath(__file__))
+data_path = os.path.join(base_dir, 'backend', 'knowledge-base', 'rules.json')
 
 with open(data_path, 'r', encoding='utf-8') as f:
     rules = json.load(f)

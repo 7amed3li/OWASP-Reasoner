@@ -1,6 +1,6 @@
 # Uzman Sistem Karar Ağacı (Expert System Decision Tree)
 
-Giriş: Bu uzman sistem (Expert System), **İleri Zincirleme (Forward Chaining)** mantığına dayanmaktadır. Sistem, `rules.json` bilgi tabanında (Knowledge Base) bulunan 5 ana OWASP zafiyeti için sağlanan göstergelere (Indicators / Symptoms) verilen yanıtları toplar. "Evet" olarak yanıtlanan her gösterge, o kategori için belirli bir ağırlık (Weight) puanı ekler.
+Giriş: Bu uzman sistem (Expert System), **İleri Zincirleme (Forward Chaining)** mantığına dayanmaktadır. Sistem, `rules.json` bilgi tabanında (Knowledge Base) bulunan tüm ilgili OWASP zafiyetlerine (bu dökümanda odaklanılan 5 ana zafiyet dahil) ait göstergelere (Indicators / Symptoms) verilen yanıtları toplar. "Evet" olarak yanıtlanan her gösterge, o kategori için belirli bir ağırlık (Weight) puanı ekler.
 Bir kategorinin soruları tamamlandığında, elde edilen toplam puan "Eşik Değeri" (Threshold) ile karşılaştırılır. Eğer toplam puan eşik değerini aşarsa (veya eşitse), zafiyet doğrulanır ve sistem son tespiti yaparak sonraki kategoriye geçer.
 
 Bu belge iki bölüme ayrılmıştır:
@@ -165,11 +165,11 @@ graph TD
     W16 --> Q17
     
     Q17 -- Evet --> W17[+4 Puan Ekle]:::wNode --> Q18
-    Q17 -- Hayır --> Q18{"S18: Sitede CSP (Content-Security-Policy) başlığı yok mu?"}:::qNode
+    Q17 -- Hayır --> Q18{"S18: Sitede CSP (Content-Security-Policy) başlığı yok mu? (Inverse Soru)"}:::qNode
     W17 --> Q18
     
-    Q18 -- Evet --> W18[+2 Puan Ekle]:::wNode --> Q19
-    Q18 -- Hayır --> Q19{"S19: Profil 'Ad Soyad' alanı HTML kod kabul ediyor mu?"}:::qNode
+    Q18 -- Hayır --> W18[+2 Puan Ekle]:::wNode --> Q19
+    Q18 -- Evet --> Q19{"S19: Profil 'Ad Soyad' alanı HTML kod kabul ediyor mu?"}:::qNode
     W18 --> Q19
     
     Q19 -- Evet --> W19[+3 Puan Ekle]:::wNode --> Q20
