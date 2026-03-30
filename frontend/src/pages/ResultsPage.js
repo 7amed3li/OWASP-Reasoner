@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './ResultsPage.css';
 
 const RISK_CONFIG = {
@@ -26,7 +26,6 @@ function RuleTypeCard({ type }) {
             </div>
             <h4 className="rt-name">{type.typeName}</h4>
 
-            {/* Triggered indicators */}
             {type.triggeredIndicators.length > 0 && (
                 <div className="indicators">
                     <span className="ind-label">🚨 Tespit Edilen Belirtiler</span>
@@ -39,7 +38,6 @@ function RuleTypeCard({ type }) {
                 </div>
             )}
 
-            {/* Remediation */}
             {type.remediation.length > 0 && (
                 <div className="remediation">
                     <span className="rem-label">✅ Çözüm Önerileri</span>
@@ -49,7 +47,6 @@ function RuleTypeCard({ type }) {
                 </div>
             )}
 
-            {/* References */}
             {type.references.length > 0 && (
                 <div className="references">
                     {type.references.map((ref, i) => (
@@ -63,11 +60,26 @@ function RuleTypeCard({ type }) {
     );
 }
 
-function FindingCard({ finding }) {
+function FindingCard({ finding, index }) {
+    const [expanded, setExpanded] = useState(index === 0); // İlk bulgu açık gelir
     const cfg = RISK_CONFIG[finding.severity] || RISK_CONFIG.medium;
+
     return (
-        <div className="finding-card glass" style={{ borderColor: `${cfg.color}33` }}>
-            <div className="finding-header">
+        <div
+            className="finding-card glass fade-in-up"
+            style={{
+                borderColor: `${cfg.color}33`,
+                animationDelay: `${index * 0.08}s`,
+            }}
+        >
+            {/* Tıklanabilir başlık */}
+            <div
+                className="finding-header"
+                onClick={() => setExpanded(e => !e)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => e.key === 'Enter' && setExpanded(v => !v)}
+            >
                 <div>
                     <span className="finding-id">{finding.categoryId}</span>
                     <h3 className="finding-name">{finding.categoryName}</h3>
@@ -75,13 +87,18 @@ function FindingCard({ finding }) {
                 <div className="finding-badges">
                     <span className={`badge badge-${finding.severity}`}>{finding.severity}</span>
                     <span className="finding-type-count">{finding.detectedTypes.length} zafiyet tipi</span>
+                    <span className="finding-toggle">{expanded ? '▲' : '▼'}</span>
                 </div>
             </div>
-            <div className="finding-types">
-                {finding.detectedTypes.map(type => (
-                    <RuleTypeCard key={type.typeId} type={type} />
-                ))}
-            </div>
+
+            {/* Detaylar (collapse) */}
+            {expanded && (
+                <div className="finding-types">
+                    {finding.detectedTypes.map(type => (
+                        <RuleTypeCard key={type.typeId} type={type} />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
@@ -90,9 +107,11 @@ export default function ResultsPage({ result, onRestart }) {
     const riskCfg = RISK_CONFIG[result.riskLevel] || RISK_CONFIG.low;
     const hasFindings = result.findings.length > 0;
 
+    const handlePrint = () => window.print();
+
     return (
         <div className="results-page">
-            {/* Risk Summary */}
+            {/* Risk Özeti */}
             <section className="risk-summary glass fade-in-up" style={{ borderColor: `${riskCfg.color}33` }}>
                 <div className="risk-left">
                     <div className="risk-icon">{riskCfg.icon}</div>
@@ -124,23 +143,26 @@ export default function ResultsPage({ result, onRestart }) {
                 </div>
             </section>
 
-            {/* Findings */}
+            {/* Bulgular */}
             {hasFindings ? (
-                <section className="findings-section fade-in-up">
+                <section className="findings-section">
                     <h2 className="section-title">🔍 Tespit Edilen Zafiyetler</h2>
+                    <p className="findings-hint">Detayları görmek için kart başlığına tıklayın.</p>
                     <div className="findings-list">
-                        {result.findings.map(f => <FindingCard key={f.categoryId} finding={f} />)}
+                        {result.findings.map((f, i) => (
+                            <FindingCard key={f.categoryId} finding={f} index={i} />
+                        ))}
                     </div>
                 </section>
             ) : (
                 <section className="no-findings glass fade-in-up">
                     <div className="no-findings-icon">🛡️</div>
                     <h2>Zafiyet Tespit Edilmedi</h2>
-                    <p>Cevapladığınız sorulara göre belirgin bir zafiyet belirtisi bulunamadı. Bu, uygulamanın tamamen güvenli olduğu anlamına gelmez — kapsamlı bir güvenlik denetimi yaptırmanızı öneririz.</p>
+                    <p>Cevapladığınız sorulara göre belirgin bir zafiyet belirtisi bulunamadı. Kapsamlı bir güvenlik denetimi yaptırmanızı öneririz.</p>
                 </section>
             )}
 
-            {/* Safe categories */}
+            {/* Güvenli Kategoriler */}
             {result.safeCategories.length > 0 && (
                 <section className="safe-section fade-in-up">
                     <h2 className="section-title">✅ Sorunsuz Kategoriler</h2>
@@ -155,11 +177,16 @@ export default function ResultsPage({ result, onRestart }) {
                 </section>
             )}
 
-            {/* Restart */}
+            {/* Footer */}
             <div className="results-footer fade-in-up">
-                <button id="restart-btn" className="btn btn-primary" onClick={onRestart}>
-                    🔄 Yeniden Analiz Et
-                </button>
+                <div className="footer-actions">
+                    <button id="restart-btn" className="btn btn-primary" onClick={onRestart}>
+                        🔄 Yeniden Analiz Et
+                    </button>
+                    <button id="print-btn" className="btn btn-secondary" onClick={handlePrint}>
+                        🖨️ Raporu Yazdır
+                    </button>
+                </div>
                 <p className="footer-note">
                     Analiz: {new Date(result.timestamp).toLocaleString('tr-TR')} · Motor: İleri Zincirleme
                 </p>

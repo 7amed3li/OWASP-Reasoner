@@ -39,7 +39,8 @@ export default function QuestionCard({ question, value, onChange, index, total }
                     className={`answer-btn answer-skip ${value === null ? 'selected' : ''}`}
                     onClick={() => onChange(question.id, null)}
                 >
-                    <span>Atla</span>
+                    <span className="answer-icon">?</span>
+                    <span>Emin Değilim</span>
                 </button>
             </div>
         </div>

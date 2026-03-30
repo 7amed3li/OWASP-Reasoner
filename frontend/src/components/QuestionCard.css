@@ -116,9 +116,9 @@
 }
 
 .answer-skip.selected {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: var(--border-bright);
-    color: var(--text-secondary);
+    background: rgba(245, 158, 11, 0.12);
+    border-color: var(--accent-orange);
+    color: var(--accent-orange);
 }
 
 .answer-icon {
