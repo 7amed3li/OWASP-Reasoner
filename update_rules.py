@@ -1,8 +1,12 @@
 import json
 import os
+from pathlib import Path
 
-base_dir = os.path.dirname(os.path.abspath(__file__))
-data_path = os.path.join(base_dir, 'backend', 'knowledge-base', 'rules.json')
+env_path = os.environ.get('RULES_PATH')
+if env_path:
+    data_path = env_path
+else:
+    data_path = str(Path(__file__).resolve().parent / 'backend' / 'knowledge-base' / 'rules.json')
 
 with open(data_path, 'r', encoding='utf-8') as f:
     rules = json.load(f)
@@ -33,7 +37,7 @@ s_mapping = {
         {"id": "S15", "question": "Yorum alanına <script>alert('XSS')</script> yazıldığında bu kod diğer ziyaretçilerin tarayıcısında çalışmaktadır.", "symptom": "Stored (Kalıcı) XSS", "weight": 4},
         {"id": "S16", "question": "Arama sonuç sayfası, aranan kelimeyi HTML encode etmeden doğrudan sayfaya yansıtmaktadır.", "symptom": "Çıktı Kodlaması Eksikliği", "weight": 3},
         {"id": "S17", "question": "Saldırgan, XSS açığı sayesinde başka bir kullanıcının oturum çerezini (session cookie) çalabilmektedir.", "symptom": "Session Çalma (Oturum Devri)", "weight": 4},
-        {"id": "S18", "question": "Sitede herhangi bir Content-Security-Policy (CSP) HTTP başlığı bulunmamaktadır.", "symptom": "CSP Eksikliği", "weight": 2, "inverse": True},
+        {"id": "S18", "question": "Sitede herhangi bir Content-Security-Policy (CSP) HTTP başlığı bulunmamaktadır.", "symptom": "CSP Eksikliği", "weight": 2},
         {"id": "S19", "question": "Profil sayfasındaki 'Ad Soyad' alanı HTML içeriği kabul etmekte ve olduğu gibi görüntülemektedir.", "symptom": "HTML Filtresiz Giriş", "weight": 3},
         {"id": "S20", "question": "Arama sonuçları sayfası <img onerror=...> gibi zararlı etiketleri filtrelemeden göstermektedir.", "symptom": "Etiket Filtresi Aşımı", "weight": 3},
         {"id": "S21", "question": "Saldırgan, XSS açığı aracılığıyla kullanıcıları kimlik avı (phishing) sitesine yönlendirebilmektedir.", "symptom": "Zararlı Yönlendirme (XSS)", "weight": 4}

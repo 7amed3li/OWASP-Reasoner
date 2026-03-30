@@ -324,8 +324,7 @@
               "id": "S18",
               "question": "Sitede herhangi bir Content-Security-Policy (CSP) HTTP başlığı bulunmamaktadır.",
               "symptom": "CSP Eksikliği",
-              "weight": 2,
-              "inverse": true
+              "weight": 2
             },
             {
               "id": "S19",
@@ -465,9 +464,7 @@
           "owasp_ref": "A05:2021",
           "remediation": [
             "Tüm varsayılan kimlik bilgilerini değiştirin.",
-            "Mümkünse XML yerine JSON kullanın.",
             "Üretimde hata mesajlarını genel tutun, detayları sadece loglayn.",
-            "Tüm XML parser'larında 'External Entities' (Dış Varlıklar) ve DTD (Document Type Definition) işlemeyi tamamen kapatın.",
             "Debug modunu üretim ortamında devre dışı bırakın.",
             "Güvenlik header'larını yapılandırın.",
             "Kullanılmayan tüm özellikleri ve servisleri kapatın.",
@@ -475,7 +472,6 @@
           ],
           "references": [
             "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
-            "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
             "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html",
             "https://cwe.mitre.org/data/definitions/16.html"
           ]

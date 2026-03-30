@@ -1,11 +1,11 @@
 # Uzman Sistem Karar Ağacı (Expert System Decision Tree)
 
-Giriş: Bu uzman sistem (Expert System), **İleri Zincirleme (Forward Chaining)** mantığına dayanmaktadır. Sistem, `rules.json` bilgi tabanında (Knowledge Base) bulunan tüm ilgili OWASP zafiyetlerine (bu dökümanda odaklanılan 5 ana zafiyet dahil) ait göstergelere (Indicators / Symptoms) verilen yanıtları toplar. "Evet" olarak yanıtlanan her gösterge, o kategori için belirli bir ağırlık (Weight) puanı ekler.
+Giriş: Bu uzman sistem (Expert System), **İleri Zincirleme (Forward Chaining)** mantığına dayanmaktadır. Bu belge 5 kategoriye ait alt küme gösterir; runtime sırasında `backend/knowledge-base/rules.json` dosyasında A01–A10 gibi daha fazla kategori tanımlı olabilir ve `backend/src/engine.js` dosyası çalışırken tüm kategoriler üzerinde döner. "Evet" olarak yanıtlanan her gösterge, o kategori için belirli bir ağırlık (Weight) puanı ekler.
 Bir kategorinin soruları tamamlandığında, elde edilen toplam puan "Eşik Değeri" (Threshold) ile karşılaştırılır. Eğer toplam puan eşik değerini aşarsa (veya eşitse), zafiyet doğrulanır ve sistem son tespiti yaparak sonraki kategoriye geçer.
 
 Bu belge iki bölüme ayrılmıştır:
-1. **Birleşik Yüksek Seviyeli Ağaç:** Sistemin 5 zafiyeti sırasıyla nasıl değerlendirdiğini gösteren ana akış.
-2. **5 Detaylı Karar Ağacı:** Her bir zafiyete ait 7 gösterge (S1-S35), eklenen ağırlık puanları ve eşik değerlendirmesini içeren detaylı şemalar.
+1. **Birleşik Yüksek Seviyeli Ağaç:** Sistemin genel çalışma akışının bir alt kümesi olarak dizilen 5 örnek zafiyeti sırasıyla nasıl değerlendirdiğini gösteren ana akış.
+2. **Detaylı Karar Ağaçları:** Örnek/alt küme olarak seçilmiş 5 zafiyete ait 7 gösterge (S1-S35), eklenen ağırlık puanları ve eşik değerlendirmesini içeren detaylı şemalar.
 
 ---
 
@@ -37,7 +37,7 @@ graph TD
 
     EvalAuth[4. Auth Failures Ağacını Başlat]:::process --> CheckAuth{Zafiyet Kesin mi? >= 12}:::eval
     CheckAuth -- Evet --> MarkAuth[Kayıt: Auth Failures Tespit Edildi]:::vuln --> EvalMis
-    CheckAuth -- Hayır --> MarkSafeAuth[Kayıt: Orijinalden Güvenli]:::safe --> EvalMis
+    CheckAuth -- Hayır --> MarkSafeAuth[Kayıt: Auth Güvenli]:::safe --> EvalMis
 
     EvalMis[5. Security Misconfig Ağacını Başlat]:::process --> CheckMis{Zafiyet Kesin mi? >= 12}:::eval
     CheckMis -- Evet --> MarkMis[Kayıt: Misconfiguration Tespit Edildi]:::vuln --> EndSession
