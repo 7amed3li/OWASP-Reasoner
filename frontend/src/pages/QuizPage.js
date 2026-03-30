@@ -23,7 +23,7 @@ export default function QuizPage({ onComplete }) {
     }, []);
 
     const handleNext = useCallback(() =>
-        setCurrentIdx(i => Math.min(i + 1, questions.length - 1)), [questions.length]);
+        setCurrentIdx(i => (questions.length === 0 ? i : Math.min(i + 1, questions.length - 1))), [questions.length]);
 
     const handlePrev = useCallback(() =>
         setCurrentIdx(i => Math.max(i - 1, 0)), []);
