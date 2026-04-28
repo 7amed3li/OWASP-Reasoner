@@ -1,0 +1,328 @@
+flowchart TD
+    START(["🔍 OWASP Uzman Sistem<br/>Karar Ağacı Başlat"])
+    START --> CAT{"Hangi Güvenlik<br/>Kategorisi?"}
+
+    %% ============================================
+    %% CATEGORY NODES
+    %% ============================================
+    CAT --> A01["🔴 A01:2021<br/>Broken Access Control<br/>Severity: CRITICAL"]
+    CAT --> A02["🔴 A02:2021<br/>Cryptographic Failures<br/>Severity: CRITICAL"]
+    CAT --> A03["🔴 A03:2021<br/>Injection<br/>Severity: CRITICAL"]
+    CAT --> A04["🟠 A04:2021<br/>Insecure Design<br/>Severity: HIGH"]
+    CAT --> A05["🟠 A05:2021<br/>Security Misconfiguration<br/>Severity: HIGH"]
+    CAT --> A06["🟡 A06:2021<br/>Vulnerable Components<br/>Severity: MEDIUM"]
+    CAT --> A07["🟠 A07:2021<br/>Authentication Failures<br/>Severity: HIGH"]
+    CAT --> A08["🟠 A08:2021<br/>Integrity Failures<br/>Severity: HIGH"]
+    CAT --> A09["🟡 A09:2021<br/>Logging Failures<br/>Severity: MEDIUM"]
+    CAT --> A10["🟠 A10:2021<br/>SSRF<br/>Severity: HIGH"]
+
+    %% ============================================
+    %% A01 - BROKEN ACCESS CONTROL
+    %% ============================================
+    A01 --> A01_TYPE{"Zafiyet Türü?"}
+    A01_TYPE --> IDOR["R-IDOR-01<br/>IDOR<br/>CWE-639"]
+    A01_TYPE --> FB["R-FB-01<br/>Forced Browsing<br/>CWE-425"]
+
+    %% --- IDOR Decision Path ---
+    IDOR --> IDOR_S1{"IDOR-S1: URL'de tahmin<br/>edilebilir ID var mı?<br/>Örn: /profile?id=42<br/>W=3"}
+    IDOR_S1 -->|Evet +3| IDOR_S2{"IDOR-S2: ID değiştirince<br/>başka kullanıcı verisine<br/>erişiliyor mu?<br/>W=3"}
+    IDOR_S1 -->|Hayır +0| IDOR_S2
+    IDOR_S2 -->|Evet +3| IDOR_S3{"IDOR-S3: 403 Forbidden<br/>hatası almıyor musun?<br/>W=2"}
+    IDOR_S2 -->|Hayır +0| IDOR_S3
+    IDOR_S3 -->|Evet +2| IDOR_S4{"IDOR-S4: API herhangi<br/>bir ID kabul ediyor mu?<br/>W=3"}
+    IDOR_S3 -->|Hayır +0| IDOR_S4
+    IDOR_S4 -->|Evet +3| IDOR_S5{"IDOR-S5: Başka kullanıcı<br/>dosyası URL ile<br/>indirilebiliyor mu?<br/>W=2"}
+    IDOR_S4 -->|Hayır +0| IDOR_S5
+    IDOR_S5 -->|Evet +2| IDOR_CHECK{"Toplam Skor<br/>≥ 5 mi?"}
+    IDOR_S5 -->|Hayır +0| IDOR_CHECK
+    IDOR_CHECK -->|Evet| IDOR_DETECT["🚨 IDOR TESPİT EDİLDİ<br/>Çözüm: UUID kullan,<br/>sahiplik doğrula"]
+    IDOR_CHECK -->|Hayır| IDOR_SAFE["✅ IDOR Riski Düşük"]
+
+    %% --- Forced Browsing Decision Path ---
+    FB --> FB_S1{"FB-S1: /admin, /dashboard<br/>gibi sayfalara giriş<br/>yapmadan erişiliyor mu?<br/>W=3"}
+    FB_S1 -->|Evet +3| FB_S2{"FB-S2: Gizli sayfalara<br/>URL tahmin ederek<br/>erişiliyor mu?<br/>W=3"}
+    FB_S1 -->|Hayır +0| FB_S2
+    FB_S2 -->|Evet +3| FB_S3{"FB-S3: Erişim sadece<br/>UI'da buton gizleyerek mi<br/>kısıtlanıyor?<br/>W=2"}
+    FB_S2 -->|Hayır +0| FB_S3
+    FB_S3 -->|Evet +2| FB_S4{"FB-S4: /.git, /backup<br/>gibi hassas dizinlere<br/>erişiliyor mu?<br/>W=3"}
+    FB_S3 -->|Hayır +0| FB_S4
+    FB_S4 -->|Evet +3| FB_S5{"FB-S5: Yetkisiz erişim<br/>loglanıyor mu?<br/>W=1 ⚡inverse"}
+    FB_S4 -->|Hayır +0| FB_S5
+    FB_S5 -->|Hayır +1| FB_CHECK{"Toplam Skor<br/>≥ 5 mi?"}
+    FB_S5 -->|Evet +0| FB_CHECK
+    FB_CHECK -->|Evet| FB_DETECT["🚨 FORCED BROWSING<br/>TESPİT EDİLDİ<br/>Çözüm: Middleware ile<br/>erişim kontrolü"]
+    FB_CHECK -->|Hayır| FB_SAFE["✅ Forced Browsing<br/>Riski Düşük"]
+
+    %% ============================================
+    %% A02 - CRYPTOGRAPHIC FAILURES
+    %% ============================================
+    A02 --> A02_TYPE{"Zafiyet Türü?"}
+    A02_TYPE --> CF01["R-CF-01<br/>Weak Password Hashing<br/>CWE-916"]
+    A02_TYPE --> CF02["R-CF-02<br/>Hard-coded Password<br/>CWE-259"]
+    A02_TYPE --> CF03["R-CF-03<br/>Insufficient Entropy<br/>CWE-331"]
+    A02_TYPE --> CF04["R-CF-04<br/>Sensitive Data in Transit<br/>CWE-319"]
+
+    %% --- Weak Password Hashing ---
+    CF01 --> CF01_S1{"CF-S1: Şifreler MD5/SHA-1<br/>ile mi hashleniyor?<br/>W=3"}
+    CF01_S1 -->|Evet +3| CF01_S2{"CF-S2: Salt değeri<br/>kullanılmıyor mu?<br/>W=2"}
+    CF01_S1 -->|Hayır +0| CF01_S2
+    CF01_S2 -->|Evet +2| CF01_S3{"CF-S3: Şifreler düz<br/>metin saklanıyor mu?<br/>W=3"}
+    CF01_S2 -->|Hayır +0| CF01_S3
+    CF01_S3 -->|Evet +3| CF01_CHECK{"Skor ≥ 3?"}
+    CF01_S3 -->|Hayır +0| CF01_CHECK
+    CF01_CHECK -->|Evet| CF01_DETECT["🚨 ZAYIF HASH<br/>TESPİT EDİLDİ<br/>Çözüm: bcrypt/Argon2<br/>kullan"]
+    CF01_CHECK -->|Hayır| CF01_SAFE["✅ Hash Güvenli"]
+
+    %% --- Hard-coded Password ---
+    CF02 --> CF02_S1{"CF02-S1: Kaynak kodunda<br/>şifreler açıkça yazılmış mı?<br/>W=4"}
+    CF02_S1 -->|Evet +4| CF02_S2{"CF02-S2: .env dosyaları<br/>Git'e commit ediliyor mu?<br/>W=3"}
+    CF02_S1 -->|Hayır +0| CF02_S2
+    CF02_S2 -->|Evet +3| CF02_S3{"CF02-S3: Derlenmiş dosyadan<br/>şifrelere ulaşılıyor mu?<br/>W=3"}
+    CF02_S2 -->|Hayır +0| CF02_S3
+    CF02_S3 -->|Evet +3| CF02_CHECK{"Skor ≥ 4?"}
+    CF02_S3 -->|Hayır +0| CF02_CHECK
+    CF02_CHECK -->|Evet| CF02_DETECT["🚨 HARD-CODED ŞİFRE<br/>TESPİT EDİLDİ<br/>Çözüm: Env vars /<br/>Vault kullan"]
+    CF02_CHECK -->|Hayır| CF02_SAFE["✅ Şifre Yönetimi Güvenli"]
+
+    %% --- Insufficient Entropy ---
+    CF03 --> CF03_S1{"CF03-S1: Token'lar<br/>Math.random() ile mi<br/>üretiliyor?<br/>W=4"}
+    CF03_S1 -->|Evet +4| CF03_S2{"CF03-S2: Session ID'ler<br/>tahmin edilebilir mi?<br/>W=3"}
+    CF03_S1 -->|Hayır +0| CF03_S2
+    CF03_S2 -->|Evet +3| CF03_CHECK{"Skor ≥ 4?"}
+    CF03_S2 -->|Hayır +0| CF03_CHECK
+    CF03_CHECK -->|Evet| CF03_DETECT["🚨 YETERSİZ ENTROPİ<br/>TESPİT EDİLDİ<br/>Çözüm: CSPRNG kullan"]
+    CF03_CHECK -->|Hayır| CF03_SAFE["✅ Entropi Yeterli"]
+
+    %% --- Sensitive Data in Transit ---
+    CF04 --> CF04_S1{"CF-S4: HTTP üzerinden<br/>hassas veri iletiliyor mu?<br/>W=3"}
+    CF04_S1 -->|Evet +3| CF04_S2{"CF-S5: HSTS header<br/>uygulanıyor mu?<br/>W=2 ⚡inverse"}
+    CF04_S1 -->|Hayır +0| CF04_S2
+    CF04_S2 -->|Hayır +2| CF04_S3{"CF-S6: TLS sertifika<br/>doğrulaması devre dışı mı?<br/>W=3"}
+    CF04_S2 -->|Evet +0| CF04_S3
+    CF04_S3 -->|Evet +3| CF04_CHECK{"Skor ≥ 3?"}
+    CF04_S3 -->|Hayır +0| CF04_CHECK
+    CF04_CHECK -->|Evet| CF04_DETECT["🚨 ŞİFRELENMEMİŞ VERİ<br/>TESPİT EDİLDİ<br/>Çözüm: HTTPS + HSTS<br/>zorunlu kıl"]
+    CF04_CHECK -->|Hayır| CF04_SAFE["✅ Veri İletimi Güvenli"]
+
+    %% ============================================
+    %% A03 - INJECTION
+    %% ============================================
+    A03 --> A03_TYPE{"Zafiyet Türü?"}
+    A03_TYPE --> CMD["R-CMD-01<br/>OS Command Injection<br/>CWE-78"]
+    A03_TYPE --> SQLI["R-SQLI-01<br/>SQL Injection<br/>CWE-89"]
+    A03_TYPE --> XSS["R-XSS-01<br/>XSS<br/>CWE-79"]
+
+    %% --- OS Command Injection ---
+    CMD --> CMD_S1{"CMD-S1: Kullanıcı girdisi<br/>sistem komutuna parametre<br/>olarak ekleniyor mu?<br/>W=4"}
+    CMD_S1 -->|Evet +4| CMD_S2{"CMD-S2: ; veya | ile<br/>farklı çıktı alınıyor mu?<br/>W=4"}
+    CMD_S1 -->|Hayır +0| CMD_S2
+    CMD_S2 -->|Evet +4| CMD_CHECK{"Skor ≥ 4?"}
+    CMD_S2 -->|Hayır +0| CMD_CHECK
+    CMD_CHECK -->|Evet| CMD_DETECT["🚨 COMMAND INJECTION<br/>TESPİT EDİLDİ<br/>Çözüm: exec() kullanma,<br/>built-in API kullan"]
+    CMD_CHECK -->|Hayır| CMD_SAFE["✅ Komut Enjeksiyonu<br/>Riski Düşük"]
+
+    %% --- SQL Injection ---
+    SQLI --> SQLI_S1{"SQLI-S1: Tek tırnak ile<br/>SQL syntax hatası<br/>alınıyor mu?<br/>W=3"}
+    SQLI_S1 -->|Evet +3| SQLI_S2{"SQLI-S2: Prepared<br/>statement kullanılmıyor mu?<br/>W=3"}
+    SQLI_S1 -->|Hayır +0| SQLI_S2
+    SQLI_S2 -->|Evet +3| SQLI_S3{"SQLI-S3: String birleştirme<br/>ile SQL oluşturuluyor mu?<br/>W=3"}
+    SQLI_S2 -->|Hayır +0| SQLI_S3
+    SQLI_S3 -->|Evet +3| SQLI_S4{"SQLI-S4: 1=1 ile tüm<br/>kayıtlar dönüyor mu?<br/>W=2"}
+    SQLI_S3 -->|Hayır +0| SQLI_S4
+    SQLI_S4 -->|Evet +2| SQLI_CHECK{"Skor ≥ 4?"}
+    SQLI_S4 -->|Hayır +0| SQLI_CHECK
+    SQLI_CHECK -->|Evet| SQLI_DETECT["🚨 SQL INJECTION<br/>TESPİT EDİLDİ<br/>Çözüm: Prepared Statement<br/>+ WAF"]
+    SQLI_CHECK -->|Hayır| SQLI_SAFE["✅ SQL Injection<br/>Riski Düşük"]
+
+    %% --- XSS ---
+    XSS --> XSS_S1{"XSS-S1: script alert<br/>filtre edilmeden<br/>görüntüleniyor mu?<br/>W=3"}
+    XSS_S1 -->|Evet +3| XSS_S2{"XSS-S2: Girdi encode<br/>edilmeden sayfaya<br/>yansıtılıyor mu?<br/>W=3"}
+    XSS_S1 -->|Hayır +0| XSS_S2
+    XSS_S2 -->|Evet +3| XSS_S3{"XSS-S3: CSP header<br/>uygulanıyor mu?<br/>W=2 ⚡inverse"}
+    XSS_S2 -->|Hayır +0| XSS_S3
+    XSS_S3 -->|Hayır +2| XSS_CHECK{"Skor ≥ 3?"}
+    XSS_S3 -->|Evet +0| XSS_CHECK
+    XSS_CHECK -->|Evet| XSS_DETECT["🚨 XSS TESPİT EDİLDİ<br/>Çözüm: HTML encode +<br/>CSP header"]
+    XSS_CHECK -->|Hayır| XSS_SAFE["✅ XSS Riski Düşük"]
+
+    %% ============================================
+    %% A04 - INSECURE DESIGN
+    %% ============================================
+    A04 --> ID01["R-ID-01<br/>Missing Threat Modeling<br/>CWE-1008"]
+    ID01 --> ID_S1{"ID-S1: Tehdit analizi<br/>dokümante edildi mi?<br/>W=3 ⚡inverse"}
+    ID_S1 -->|Hayır +3| ID_S2{"ID-S2: İş mantığı<br/>hatalarına karşı<br/>koruma var mı?<br/>W=3 ⚡inverse"}
+    ID_S1 -->|Evet +0| ID_S2
+    ID_S2 -->|Hayır +3| ID_S3{"ID-S3: Kritik işlemler<br/>adım adım onay<br/>gerektiriyor mu?<br/>W=2 ⚡inverse"}
+    ID_S2 -->|Evet +0| ID_S3
+    ID_S3 -->|Hayır +2| ID_CHECK{"Skor ≥ 4?"}
+    ID_S3 -->|Evet +0| ID_CHECK
+    ID_CHECK -->|Evet| ID_DETECT["🚨 GÜVENSİZ TASARIM<br/>TESPİT EDİLDİ<br/>Çözüm: SDLC başında<br/>tehdit modellemesi yap"]
+    ID_CHECK -->|Hayır| ID_SAFE["✅ Tasarım Güvenli"]
+
+    %% ============================================
+    %% A05 - SECURITY MISCONFIGURATION
+    %% ============================================
+    A05 --> A05_TYPE{"Zafiyet Türü?"}
+    A05_TYPE --> MC01["R-MC-01<br/>Exposed Debug Info<br/>CWE-215"]
+    A05_TYPE --> MC02["R-MC-02<br/>Configuration<br/>CWE-16"]
+    A05_TYPE --> MC03["R-MC-03<br/>XXE<br/>CWE-611"]
+
+    %% --- Exposed Debug Info ---
+    MC01 --> MC_S1{"MC-S1: Hata sayfasında<br/>stack trace görünüyor mu?<br/>W=3"}
+    MC_S1 -->|Evet +3| MC_S2{"MC-S2: Üretimde debug<br/>modu etkin mi?<br/>W=3"}
+    MC_S1 -->|Hayır +0| MC_S2
+    MC_S2 -->|Evet +3| MC_S3{"MC-S3: Varsayılan kimlik<br/>bilgileri kullanılıyor mu?<br/>W=3"}
+    MC_S2 -->|Hayır +0| MC_S3
+    MC_S3 -->|Evet +3| MC_S4{"MC-S4: Güvenlik<br/>header'ları eksik mi?<br/>W=2"}
+    MC_S3 -->|Hayır +0| MC_S4
+    MC_S4 -->|Evet +2| MC01_CHECK{"Skor ≥ 4?"}
+    MC_S4 -->|Hayır +0| MC01_CHECK
+    MC01_CHECK -->|Evet| MC01_DETECT["🚨 DEBUG BİLGİSİ AÇIK<br/>TESPİT EDİLDİ<br/>Çözüm: Debug kapat,<br/>genel hata mesajı kullan"]
+    MC01_CHECK -->|Hayır| MC01_SAFE["✅ Konfigürasyon Güvenli"]
+
+    %% --- Default Configuration ---
+    MC02 --> MC_S5{"MC-S5: Sunucu varsayılan<br/>konfigürasyon ile mi<br/>çalışıyor?<br/>W=3"}
+    MC_S5 -->|Evet +3| MC_S6{"MC-S6: Gereksiz port<br/>ve servisler aktif mi?<br/>W=3"}
+    MC_S5 -->|Hayır +0| MC_S6
+    MC_S6 -->|Evet +3| MC02_CHECK{"Skor ≥ 4?"}
+    MC_S6 -->|Hayır +0| MC02_CHECK
+    MC02_CHECK -->|Evet| MC02_DETECT["🚨 VARSAYILAN KONFİG<br/>TESPİT EDİLDİ<br/>Çözüm: Hardening<br/>guidelines uygula"]
+    MC02_CHECK -->|Hayır| MC02_SAFE["✅ Yapılandırma Güvenli"]
+
+    %% --- XXE ---
+    MC03 --> MC_S7{"MC-S7: Uygulama dışarıdan<br/>XML kabul edip<br/>parse ediyor mu?<br/>W=2"}
+    MC_S7 -->|Evet +2| MC_S8{"MC-S8: XXE payload ile<br/>sistemden dosya<br/>okunabiliyor mu?<br/>W=4"}
+    MC_S7 -->|Hayır +0| MC_S8
+    MC_S8 -->|Evet +4| MC03_CHECK{"Skor ≥ 4?"}
+    MC_S8 -->|Hayır +0| MC03_CHECK
+    MC03_CHECK -->|Evet| MC03_DETECT["🚨 XXE TESPİT EDİLDİ<br/>Çözüm: DTD kapat,<br/>JSON kullan"]
+    MC03_CHECK -->|Hayır| MC03_SAFE["✅ XXE Riski Düşük"]
+
+    %% ============================================
+    %% A06 - VULNERABLE COMPONENTS
+    %% ============================================
+    A06 --> VOC["R-VOC-01<br/>Known Vulnerabilities<br/>CWE-1104"]
+    VOC --> VOC_S1{"VOC-S1: Kütüphane<br/>sürümleri düzenli<br/>kontrol ediliyor mu?<br/>W=3 ⚡inverse"}
+    VOC_S1 -->|Hayır +3| VOC_S2{"VOC-S2: End-of-Life<br/>platformlar kullanılıyor mu?<br/>W=4"}
+    VOC_S1 -->|Evet +0| VOC_S2
+    VOC_S2 -->|Evet +4| VOC_S3{"VOC-S3: SCA araçları<br/>kullanılıyor mu?<br/>W=2 ⚡inverse"}
+    VOC_S2 -->|Hayır +0| VOC_S3
+    VOC_S3 -->|Hayır +2| VOC_CHECK{"Skor ≥ 4?"}
+    VOC_S3 -->|Evet +0| VOC_CHECK
+    VOC_CHECK -->|Evet| VOC_DETECT["🚨 ZAFİYETLİ BİLEŞEN<br/>TESPİT EDİLDİ<br/>Çözüm: BOM takibi,<br/>CI/CD yama süreci"]
+    VOC_CHECK -->|Hayır| VOC_SAFE["✅ Bileşenler Güncel"]
+
+    %% ============================================
+    %% A07 - AUTHENTICATION FAILURES
+    %% ============================================
+    A07 --> A07_TYPE{"Zafiyet Türü?"}
+    A07_TYPE --> AUTH01["R-AUTH-01<br/>Weak Authentication<br/>CWE-287"]
+    A07_TYPE --> AUTH02["R-AUTH-02<br/>Session Fixation<br/>CWE-384"]
+    A07_TYPE --> AUTH03["R-AUTH-03<br/>Weak Password Recovery<br/>CWE-640"]
+
+    %% --- Weak Authentication ---
+    AUTH01 --> AUTH_S1{"AUTH-S1: Rate limiting<br/>veya hesap kilitleme<br/>var mı?<br/>W=3 ⚡inverse"}
+    AUTH_S1 -->|Hayır +3| AUTH_S2{"AUTH-S2: MFA<br/>destekleniyor mu?<br/>W=2 ⚡inverse"}
+    AUTH_S1 -->|Evet +0| AUTH_S2
+    AUTH_S2 -->|Hayır +2| AUTH_S3{"AUTH-S3: Zayıf şifreler<br/>kabul ediliyor mu?<br/>W=2"}
+    AUTH_S2 -->|Evet +0| AUTH_S3
+    AUTH_S3 -->|Evet +2| AUTH_S4{"AUTH-S4: Oturum token<br/>giriş sonrası<br/>yenileniyor mu?<br/>W=2 ⚡inverse"}
+    AUTH_S3 -->|Hayır +0| AUTH_S4
+    AUTH_S4 -->|Hayır +2| AUTH01_CHECK{"Skor ≥ 4?"}
+    AUTH_S4 -->|Evet +0| AUTH01_CHECK
+    AUTH01_CHECK -->|Evet| AUTH01_DETECT["🚨 ZAYIF KİMLİK DOĞRULAMA<br/>TESPİT EDİLDİ<br/>Çözüm: MFA + Rate Limit<br/>+ Güçlü şifre politikası"]
+    AUTH01_CHECK -->|Hayır| AUTH01_SAFE["✅ Kimlik Doğrulama<br/>Güvenli"]
+
+    %% --- Session Fixation ---
+    AUTH02 --> AUTH_S5{"AUTH-S5: Login sonrası<br/>Session ID değişiyor mu?<br/>W=4 ⚡inverse"}
+    AUTH_S5 -->|Hayır +4| AUTH_S6{"AUTH-S6: URL ile session<br/>cookie enjekte edilebiliyor mu?<br/>W=3"}
+    AUTH_S5 -->|Evet +0| AUTH_S6
+    AUTH_S6 -->|Evet +3| AUTH02_CHECK{"Skor ≥ 4?"}
+    AUTH_S6 -->|Hayır +0| AUTH02_CHECK
+    AUTH02_CHECK -->|Evet| AUTH02_DETECT["🚨 SESSION FIXATION<br/>TESPİT EDİLDİ<br/>Çözüm: Session Regeneration<br/>+ HTTPOnly cookie"]
+    AUTH02_CHECK -->|Hayır| AUTH02_SAFE["✅ Oturum Yönetimi<br/>Güvenli"]
+
+    %% --- Weak Password Recovery ---
+    AUTH03 --> AUTH_S7{"AUTH-S7: Şifre sıfırlama<br/>linkleri süresiz veya<br/>çok uzun süreli mi?<br/>W=3"}
+    AUTH_S7 -->|Evet +3| AUTH_S8{"AUTH-S8: Kolay<br/>güvenlik soruları<br/>kullanılıyor mu?<br/>W=3"}
+    AUTH_S7 -->|Hayır +0| AUTH_S8
+    AUTH_S8 -->|Evet +3| AUTH03_CHECK{"Skor ≥ 4?"}
+    AUTH_S8 -->|Hayır +0| AUTH03_CHECK
+    AUTH03_CHECK -->|Evet| AUTH03_DETECT["🚨 ZAYIF ŞİFRE KURTARMA<br/>TESPİT EDİLDİ<br/>Çözüm: Kısa ömürlü token<br/>+ E-posta/SMS kodu"]
+    AUTH03_CHECK -->|Hayır| AUTH03_SAFE["✅ Kurtarma Mekanizması<br/>Güvenli"]
+
+    %% ============================================
+    %% A08 - SOFTWARE & DATA INTEGRITY
+    %% ============================================
+    A08 --> SDI["R-SDI-01<br/>Insecure CI/CD &<br/>Deserialization<br/>CWE-829"]
+    SDI --> SDI_S1{"SDI-S1: Serialize edilmiş<br/>veri kontrol edilmeden<br/>deserialize ediliyor mu?<br/>W=4"}
+    SDI_S1 -->|Evet +4| SDI_S2{"SDI-S2: Güncelleme dijital<br/>imza doğrulaması<br/>yapıyor mu?<br/>W=3 ⚡inverse"}
+    SDI_S1 -->|Hayır +0| SDI_S2
+    SDI_S2 -->|Hayır +3| SDI_S3{"SDI-S3: CI/CD'den<br/>incelenmeden üretime<br/>dağıtım yapılıyor mu?<br/>W=2"}
+    SDI_S2 -->|Evet +0| SDI_S3
+    SDI_S3 -->|Evet +2| SDI_CHECK{"Skor ≥ 5?"}
+    SDI_S3 -->|Hayır +0| SDI_CHECK
+    SDI_CHECK -->|Evet| SDI_DETECT["🚨 BÜTÜNLÜK HATASI<br/>TESPİT EDİLDİ<br/>Çözüm: JSON kullan,<br/>SCA entegre et"]
+    SDI_CHECK -->|Hayır| SDI_SAFE["✅ Bütünlük Güvenli"]
+
+    %% ============================================
+    %% A09 - LOGGING & MONITORING
+    %% ============================================
+    A09 --> LOG["R-LOG-01<br/>Insufficient Logging<br/>CWE-778"]
+    LOG --> LOG_S1{"LOG-S1: Giriş denemeleri<br/>loglanıyor mu?<br/>W=3 ⚡inverse"}
+    LOG_S1 -->|Hayır +3| LOG_S2{"LOG-S2: Loglar merkezi<br/>sistemde mi toplanıyor?<br/>W=2 ⚡inverse"}
+    LOG_S1 -->|Evet +0| LOG_S2
+    LOG_S2 -->|Hayır +2| LOG_S3{"LOG-S3: Şüpheli aktivitede<br/>otomatik alarm<br/>gidiyor mu?<br/>W=3 ⚡inverse"}
+    LOG_S2 -->|Evet +0| LOG_S3
+    LOG_S3 -->|Hayır +3| LOG_CHECK{"Skor ≥ 4?"}
+    LOG_S3 -->|Evet +0| LOG_CHECK
+    LOG_CHECK -->|Evet| LOG_DETECT["🚨 YETERSİZ LOGLAMA<br/>TESPİT EDİLDİ<br/>Çözüm: ELK stack,<br/>merkezi log, alarm"]
+    LOG_CHECK -->|Hayır| LOG_SAFE["✅ Loglama Yeterli"]
+
+    %% ============================================
+    %% A10 - SSRF
+    %% ============================================
+    A10 --> SSRF["R-SSRF-01<br/>SSRF<br/>CWE-918"]
+    SSRF --> SSRF_S1{"SSRF-S1: Kullanıcıdan URL<br/>alıp doğrudan istek<br/>atılıyor mu?<br/>W=3"}
+    SSRF_S1 -->|Evet +3| SSRF_S2{"SSRF-S2: localhost /<br/>127.0.0.1 / 169.254.x<br/>engellenmiş mi?<br/>W=3 ⚡inverse"}
+    SSRF_S1 -->|Hayır +0| SSRF_S2
+    SSRF_S2 -->|Hayır +3| SSRF_S3{"SSRF-S3: Bulut meta<br/>verilerini çekebildin mi?<br/>W=4"}
+    SSRF_S2 -->|Evet +0| SSRF_S3
+    SSRF_S3 -->|Evet +4| SSRF_CHECK{"Skor ≥ 5?"}
+    SSRF_S3 -->|Hayır +0| SSRF_CHECK
+    SSRF_CHECK -->|Evet| SSRF_DETECT["🚨 SSRF TESPİT EDİLDİ<br/>Çözüm: Allowlist,<br/>iç ağ IP engelle"]
+    SSRF_CHECK -->|Hayır| SSRF_SAFE["✅ SSRF Riski Düşük"]
+
+    %% ============================================
+    %% STYLING
+    %% ============================================
+    classDef startNode fill:#1a1a2e,stroke:#e94560,color:#fff,stroke-width:3px
+    classDef criticalCat fill:#e94560,stroke:#fff,color:#fff,stroke-width:2px
+    classDef highCat fill:#f97316,stroke:#fff,color:#fff,stroke-width:2px
+    classDef mediumCat fill:#eab308,stroke:#333,color:#333,stroke-width:2px
+    classDef typeNode fill:#0f3460,stroke:#16213e,color:#fff,stroke-width:2px
+    classDef questionNode fill:#533483,stroke:#e94560,color:#fff,stroke-width:1px
+    classDef checkNode fill:#1a1a2e,stroke:#00d2ff,color:#fff,stroke-width:2px
+    classDef detectNode fill:#dc2626,stroke:#fff,color:#fff,stroke-width:3px
+    classDef safeNode fill:#16a34a,stroke:#fff,color:#fff,stroke-width:2px
+    classDef decisionNode fill:#7c3aed,stroke:#fff,color:#fff,stroke-width:2px
+
+    class START startNode
+    class A01,A02,A03 criticalCat
+    class A04,A05,A07,A08,A10 highCat
+    class A06,A09 mediumCat
+    class IDOR,FB,CF01,CF02,CF03,CF04,CMD,SQLI,XSS,ID01,MC01,MC02,MC03,VOC,AUTH01,AUTH02,AUTH03,SDI,LOG,SSRF typeNode
+    class IDOR_S1,IDOR_S2,IDOR_S3,IDOR_S4,IDOR_S5,FB_S1,FB_S2,FB_S3,FB_S4,FB_S5 questionNode
+    class CF01_S1,CF01_S2,CF01_S3,CF02_S1,CF02_S2,CF02_S3,CF03_S1,CF03_S2,CF04_S1,CF04_S2,CF04_S3 questionNode
+    class CMD_S1,CMD_S2,SQLI_S1,SQLI_S2,SQLI_S3,SQLI_S4,XSS_S1,XSS_S2,XSS_S3 questionNode
+    class ID_S1,ID_S2,ID_S3 questionNode
+    class MC_S1,MC_S2,MC_S3,MC_S4,MC_S5,MC_S6,MC_S7,MC_S8 questionNode
+    class VOC_S1,VOC_S2,VOC_S3 questionNode
+    class AUTH_S1,AUTH_S2,AUTH_S3,AUTH_S4,AUTH_S5,AUTH_S6,AUTH_S7,AUTH_S8 questionNode
+    class SDI_S1,SDI_S2,SDI_S3 questionNode
+    class LOG_S1,LOG_S2,LOG_S3 questionNode
+    class SSRF_S1,SSRF_S2,SSRF_S3 questionNode
+    class IDOR_CHECK,FB_CHECK,CF01_CHECK,CF02_CHECK,CF03_CHECK,CF04_CHECK,CMD_CHECK,SQLI_CHECK,XSS_CHECK,ID_CHECK,MC01_CHECK,MC02_CHECK,MC03_CHECK,VOC_CHECK,AUTH01_CHECK,AUTH02_CHECK,AUTH03_CHECK,SDI_CHECK,LOG_CHECK,SSRF_CHECK checkNode
+    class IDOR_DETECT,FB_DETECT,CF01_DETECT,CF02_DETECT,CF03_DETECT,CF04_DETECT,CMD_DETECT,SQLI_DETECT,XSS_DETECT,ID_DETECT,MC01_DETECT,MC02_DETECT,MC03_DETECT,VOC_DETECT,AUTH01_DETECT,AUTH02_DETECT,AUTH03_DETECT,SDI_DETECT,LOG_DETECT,SSRF_DETECT detectNode
+    class IDOR_SAFE,FB_SAFE,CF01_SAFE,CF02_SAFE,CF03_SAFE,CF04_SAFE,CMD_SAFE,SQLI_SAFE,XSS_SAFE,ID_SAFE,MC01_SAFE,MC02_SAFE,MC03_SAFE,VOC_SAFE,AUTH01_SAFE,AUTH02_SAFE,AUTH03_SAFE,SDI_SAFE,LOG_SAFE,SSRF_SAFE safeNode
+    class CAT,A01_TYPE,A02_TYPE,A03_TYPE,A05_TYPE,A07_TYPE decisionNode

@@ -1,85 +1,76 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './ResultsPage.css';
 
-const RISK_CONFIG = {
-    critical: { color: '#ef4444', icon: '🔴', label: 'KRİTİK' },
-    high: { color: '#f59e0b', icon: '🟠', label: 'YÜKSEK' },
-    medium: { color: '#3b82f6', icon: '🔵', label: 'ORTA' },
-    low: { color: '#22c55e', icon: '🟢', label: 'DÜŞÜK' },
+const SEVERITY_MAP = {
+    critical: '#EF4444',
+    high: '#F97316',
+    medium: '#EAB308',
+    low: '#60A5FA',
+    safe: '#10B981',
 };
 
-function RuleTypeCard({ type }) {
+const SEVERITY_TR = {
+    critical: 'Kritik',
+    high: 'Yüksek',
+    medium: 'Orta',
+    low: 'Düşük',
+    safe: 'Güvenli',
+};
+
+function RuleTypeCard({ type, severityColor }) {
     return (
-        <div className="rule-type-card">
-            <div className="rt-header">
-                <div className="rt-id-wrap">
-                    <span className="rt-id">{type.typeId}</span>
-                    <span className="rt-cwe">{type.cwe}</span>
+        <div className="v-card">
+            <div className="v-card-top">
+                <div className="v-card-ids">
+                    <div className="v-rule-id">{type.typeId}</div>
+                    <div className="v-cwe-id">{type.cwe}</div>
                 </div>
-                <div className="rt-score-bar">
-                    <div
-                        className="rt-score-fill"
-                        style={{ width: `${Math.min((type.score / type.threshold) * 100, 100)}%` }}
-                    />
-                </div>
-                <span className="rt-score-text">{type.score}/{type.threshold}</span>
+                <div className="v-card-name">{type.typeName}</div>
             </div>
-            <h4 className="rt-name">{type.typeName}</h4>
+            
+            <div className="v-card-section">
+                <div className="v-section-label">SYMPTOMS</div>
+                {type.triggeredIndicators.map(ind => (
+                    <div className="v-symptom-row" key={ind.id}>
+                        <span className="v-symptom-text">{ind.symptom}</span>
+                        <span className="v-weight-badge">+{ind.weight}</span>
+                    </div>
+                ))}
+            </div>
 
-            {/* Triggered indicators */}
-            {type.triggeredIndicators.length > 0 && (
-                <div className="indicators">
-                    <span className="ind-label">🚨 Tespit Edilen Belirtiler</span>
-                    {type.triggeredIndicators.map(ind => (
-                        <div className="indicator triggered" key={ind.id}>
-                            <span className="ind-symptom">{ind.symptom}</span>
-                            <span className="ind-weight">+{ind.weight}</span>
+            <div className="v-card-section">
+                <div className="v-section-label">RECOMMENDATIONS</div>
+                {type.remediation.map((r, i) => (
+                    <div className="v-rec-row" key={i}>
+                        <div className="v-rec-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
                         </div>
-                    ))}
-                </div>
-            )}
-
-            {/* Remediation */}
-            {type.remediation.length > 0 && (
-                <div className="remediation">
-                    <span className="rem-label">✅ Çözüm Önerileri</span>
-                    <ul>
-                        {type.remediation.map((r, i) => <li key={i}>{r}</li>)}
-                    </ul>
-                </div>
-            )}
-
-            {/* References */}
-            {type.references.length > 0 && (
-                <div className="references">
-                    {type.references.map((ref, i) => (
-                        <a href={ref} target="_blank" rel="noreferrer" key={i} className="ref-link">
-                            🔗 {(() => { try { return new URL(ref).hostname; } catch { return ref; } })()}
-                        </a>
-                    ))}
-                </div>
-            )}
+                        <span className="v-rec-text">{r}</span>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
 
 function FindingCard({ finding }) {
-    const cfg = RISK_CONFIG[finding.severity] || RISK_CONFIG.medium;
+    const severityColor = SEVERITY_MAP[finding.severity] || '#EAB308';
     return (
-        <div className="finding-card glass" style={{ borderColor: `${cfg.color}33` }}>
+        <div className="finding-group">
             <div className="finding-header">
-                <div>
-                    <span className="finding-id">{finding.categoryId}</span>
-                    <h3 className="finding-name">{finding.categoryName}</h3>
+                <div className="finding-header-top">
+                    <span className="finding-owasp-id">{finding.categoryId}</span>
+                    <span className={`severity-badge badge-${finding.severity}`}>
+                        {finding.severity.toUpperCase()}
+                    </span>
                 </div>
-                <div className="finding-badges">
-                    <span className={`badge badge-${finding.severity}`}>{finding.severity}</span>
-                    <span className="finding-type-count">{finding.detectedTypes.length} zafiyet tipi</span>
-                </div>
+                <h3 className="finding-cat-name">{finding.categoryName}</h3>
             </div>
-            <div className="finding-types">
+            <div className="vulnerabilities-grid">
                 {finding.detectedTypes.map(type => (
-                    <RuleTypeCard key={type.typeId} type={type} />
+                    <RuleTypeCard key={type.typeId} type={type} severityColor={severityColor} />
                 ))}
             </div>
         </div>
@@ -87,82 +78,117 @@ function FindingCard({ finding }) {
 }
 
 export default function ResultsPage({ result, onRestart }) {
-    const riskCfg = RISK_CONFIG[result.riskLevel] || RISK_CONFIG.low;
+    const riskLevel = result.riskLevel || 'low';
+    const isSafe = riskLevel === 'low' || riskLevel === 'safe';
+    const severityColor = SEVERITY_MAP[riskLevel];
+    const score = result.findings.length > 0 ? 85 : 0; 
+    const [offset, setOffset] = useState(264);
+
+    useEffect(() => {
+        const finalOffset = 264 * (1 - (score / 100));
+        setTimeout(() => setOffset(finalOffset), 100);
+    }, [score]);
+
     const hasFindings = result.findings.length > 0;
 
     return (
-        <div className="results-page">
-            {/* Risk Summary */}
-            <section className="risk-summary glass fade-in-up" style={{ borderColor: `${riskCfg.color}33` }}>
-                <div className="risk-left">
-                    <div className="risk-icon">{riskCfg.icon}</div>
-                    <div>
-                        <div className="risk-label">Genel Risk Seviyesi</div>
-                        <div className="risk-level" style={{ color: riskCfg.color }}>{riskCfg.label}</div>
-                        <p className="risk-summary-text">{result.summary}</p>
-                    </div>
-                </div>
-                <div className="risk-stats">
-                    <div className="risk-stat">
-                        <span className="rs-num" style={{ color: riskCfg.color }}>{result.findings.length}</span>
-                        <span className="rs-label">Etkilenen Kategori</span>
-                    </div>
-                    <div className="risk-stat">
-                        <span className="rs-num">{result.findings.reduce((a, f) => a + f.detectedTypes.length, 0)}</span>
-                        <span className="rs-label">Zafiyet Tipi</span>
-                    </div>
-                    <div className="risk-stat">
-                        <span className="rs-num">{result.totalAnswered}</span>
-                        <span className="rs-label">Değerlendirilen Soru</span>
-                    </div>
-                    {result.safeCategories.length > 0 && (
-                        <div className="risk-stat">
-                            <span className="rs-num" style={{ color: '#22c55e' }}>{result.safeCategories.length}</span>
-                            <span className="rs-label">Güvenli Kategori</span>
+        <div className="results-page fade-in">
+            <div className="result-hero" style={{ '--severity-color': severityColor }}>
+                <div className="hero-left">
+                    <div className="score-ring">
+                        <svg className="score-svg" viewBox="0 0 100 100">
+                            <circle className="ring-bg" cx="50" cy="50" r="42"></circle>
+                            <circle 
+                                className="ring-progress" 
+                                cx="50" 
+                                cy="50" 
+                                r="42" 
+                                style={{ strokeDashoffset: offset }}
+                            ></circle>
+                        </svg>
+                        <div className="score-content">
+                            <span className="score-num">{score}</span>
+                            <span className="score-label">RİSK</span>
                         </div>
-                    )}
+                    </div>
                 </div>
-            </section>
 
-            {/* Findings */}
+                <div className="hero-middle">
+                    <div className="res-eyebrow">ZAFİYET ANALİZİ</div>
+                    <h2 className="res-severity" style={{ color: isSafe ? 'white' : severityColor }}>
+                        {SEVERITY_TR[riskLevel] || riskLevel.toUpperCase()}
+                    </h2>
+                    <p className="res-summary">{result.summary}</p>
+                </div>
+
+                <div className="hero-right">
+                    <div className="hero-stat">
+                        <span className="hero-stat-val">{result.findings.length}</span>
+                        <span className="hero-stat-label">BULGU</span>
+                    </div>
+                    <div className="hero-stat">
+                        <span className="hero-stat-val">{result.findings.length + result.safeCategories.length}</span>
+                        <span className="hero-stat-label">KATEGORİ</span>
+                    </div>
+                    <div className="hero-stat">
+                        <span className="hero-stat-val">{result.totalAnswered}</span>
+                        <span className="hero-stat-label">KURAL</span>
+                    </div>
+                </div>
+            </div>
+
             {hasFindings ? (
-                <section className="findings-section fade-in-up">
-                    <h2 className="section-title">🔍 Tespit Edilen Zafiyetler</h2>
+                <div className="vulnerabilities-section">
+                    <div className="section-label">TESPİT EDİLEN ZAFİYETLER</div>
                     <div className="findings-list">
                         {result.findings.map(f => <FindingCard key={f.categoryId} finding={f} />)}
                     </div>
-                </section>
+                </div>
             ) : (
-                <section className="no-findings glass fade-in-up">
-                    <div className="no-findings-icon">🛡️</div>
-                    <h2>Zafiyet Tespit Edilmedi</h2>
-                    <p>Cevapladığınız sorulara göre belirgin bir zafiyet belirtisi bulunamadı. Bu, uygulamanın tamamen güvenli olduğu anlamına gelmez — kapsamlı bir güvenlik denetimi yaptırmanızı öneririz.</p>
-                </section>
+                <div className="safe-celebration">
+                    <div className="safe-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <h2 className="safe-title">Her Şey Yolunda</h2>
+                    <p className="safe-subtitle">
+                        Herhangi bir zafiyet tespit edilmedi. Uygulamanız analiz edilen güvenlik standartlarına uygundur.
+                    </p>
+                </div>
             )}
 
-            {/* Safe categories */}
             {result.safeCategories.length > 0 && (
-                <section className="safe-section fade-in-up">
-                    <h2 className="section-title">✅ Sorunsuz Kategoriler</h2>
-                    <div className="safe-grid">
+                <div className="passed-categories">
+                    <div className="section-label">GEÇİLEN KATEGORİLER</div>
+                    <div className="passed-grid">
                         {result.safeCategories.map(c => (
-                            <div className="safe-card glass" key={c.categoryId}>
-                                <span className="safe-id">{c.categoryId}</span>
-                                <span className="safe-name">{c.categoryName}</span>
+                            <div className="passed-card" key={c.categoryId}>
+                                <div className="passed-checkmark">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </div>
+                                <div className="passed-card-info">
+                                    <div className="passed-name">{c.categoryName}</div>
+                                    <div className="passed-owasp-id">{c.categoryId}</div>
+                                </div>
                             </div>
                         ))}
                     </div>
-                </section>
+                </div>
             )}
 
-            {/* Restart */}
-            <div className="results-footer fade-in-up">
-                <button id="restart-btn" className="btn btn-primary" onClick={onRestart}>
-                    🔄 Yeniden Analiz Et
+            <div className="results-footer">
+                <button className="btn-restart" onClick={onRestart}>
+                    Yeni Analiz Başlat
                 </button>
-                <p className="footer-note">
-                    Analiz: {new Date(result.timestamp).toLocaleString('tr-TR')} · Motor: İleri Zincirleme
-                </p>
+                <div className="footer-meta">
+                    {new Date(result.timestamp).toLocaleString('en-US', { 
+                        month: 'numeric', day: 'numeric', year: 'numeric', 
+                        hour: 'numeric', minute: 'numeric', hour12: true 
+                    })} · İleri Zincirleme Çıkarım Motoru
+                </div>
             </div>
         </div>
     );

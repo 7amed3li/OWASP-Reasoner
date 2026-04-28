@@ -3,7 +3,8 @@ import QuestionCard from '../components/QuestionCard';
 import { fetchQuestions, analyzeAnswers } from '../api/owaspApi';
 import './QuizPage.css';
 
-export default function QuizPage({ onComplete }) {
+export default function QuizPage({ categoryId, onComplete }) {
+    const [allQuestions, setAllQuestions] = useState([]);
     const [questions, setQuestions] = useState([]);
     const [answers, setAnswers] = useState({});
     const [currentIdx, setCurrentIdx] = useState(0);
@@ -13,9 +14,17 @@ export default function QuizPage({ onComplete }) {
 
     useEffect(() => {
         fetchQuestions()
-            .then(qs => { setQuestions(qs); setLoading(false); })
-            .catch(() => { setError('Sorular yüklenemedi.'); setLoading(false); });
-    }, []);
+            .then(qs => {
+                setAllQuestions(qs);
+                if (categoryId && typeof categoryId === 'string') {
+                    setQuestions(qs.filter(q => q.categoryId === categoryId));
+                } else {
+                    setQuestions(qs);
+                }
+                setLoading(false);
+            })
+            .catch(() => { setError('Sorular yüklenemedi (Failed to load questions).'); setLoading(false); });
+    }, [categoryId]);
 
     const handleAnswer = useCallback((id, value) => {
         setAnswers(prev => ({ ...prev, [id]: value }));
@@ -27,114 +36,128 @@ export default function QuizPage({ onComplete }) {
     const handleSubmit = async () => {
         setSubmitting(true);
         try {
-            // null = atlandı → engine'e gönderme, sadece true/false gönder
             const payload = Object.fromEntries(
                 Object.entries(answers).filter(([, v]) => v !== null)
             );
             const result = await analyzeAnswers(payload);
             onComplete(result);
         } catch {
-            setError('Analiz sırasında hata oluştu.');
+            setError('Analiz başarısız oldu (Analysis failed).');
             setSubmitting(false);
         }
     };
 
-    // null = atlandı, undefined = henüz dokunulmadı
     const answered = Object.values(answers).filter(v => v !== null && v !== undefined).length;
     const progress = questions.length > 0 ? ((currentIdx + 1) / questions.length) * 100 : 0;
 
-    if (loading) return <div className="quiz-loading"><div className="loading-spinner" /><p>Sorular yükleniyor...</p></div>;
-    if (error) return <div className="quiz-error">⚠️ {error}</div>;
-    if (questions.length === 0) return null;
+    if (loading) return <div style={{ textAlign: 'center', padding: '100px' }}><div className="loading-spinner" /></div>;
+    if (error) return <div style={{ textAlign: 'center', padding: '100px', color: 'var(--critical)' }}>{error}</div>;
 
     const current = questions[currentIdx];
     const isLast = currentIdx === questions.length - 1;
 
-    // Group navigation by category
-    const categories = [...new Set(questions.map(q => q.categoryName))];
+    const categories = [...new Set(allQuestions.map(q => q.categoryName))];
+    const nextQ = questions[currentIdx + 1];
+    const isLastOfType = !nextQ || nextQ.typeName !== current.typeName;
 
     return (
-        <div className="quiz-page">
-            {/* Sidebar */}
-            <aside className="quiz-sidebar glass">
-                <div className="sidebar-title">Kategoriler</div>
-                {categories.map((cat, i) => {
-                    const catQuestions = questions.filter(q => q.categoryName === cat);
-                    const catAnswered = catQuestions.filter(q => answers[q.id] === true || answers[q.id] === false).length;
-                    return (
-                        <div
-                            key={cat}
-                            className={`sidebar-cat ${questions[currentIdx].categoryName === cat ? 'active' : ''}`}
-                            onClick={() => setCurrentIdx(questions.findIndex(q => q.categoryName === cat))}
-                        >
-                            <span className="sidebar-cat-name">{cat}</span>
-                            <span className="sidebar-cat-progress">{catAnswered}/{catQuestions.length}</span>
+        <div className="quiz-page fade-in">
+            <div className="analysis-progress">
+                <div className="progress-fill" style={{ width: `${progress}%` }} />
+            </div>
+            <div className="progress-labels">
+                <span>Analiz İlerlemesi (Progress)</span>
+                <span>{Math.round(progress)}%</span>
+            </div>
+
+            <div className="analysis-layout">
+                <aside className="sidebar">
+                    <div className="section-label">KATEGORİLER (CATEGORIES)</div>
+                    <ul className="sidebar-list">
+                        {categories.map((cat) => {
+                            const catQuestions = allQuestions.filter(q => q.categoryName === cat);
+                            const catAnswered = catQuestions.filter(q => answers[q.id] !== undefined).length;
+                            const isActive = current.categoryName === cat;
+                            const isComplete = catAnswered === catQuestions.length;
+
+                            return (
+                                <li 
+                                    key={cat} 
+                                    className={`sidebar-item ${isActive ? 'active' : ''}`}
+                                    onClick={() => {
+                                        if (!categoryId) {
+                                            const firstIdx = questions.findIndex(q => q.categoryName === cat);
+                                            if (firstIdx !== -1) setCurrentIdx(firstIdx);
+                                        }
+                                    }}
+                                >
+                                    <div className="sidebar-item-left">
+                                        <div className={`status-dot ${isActive ? 'active' : ''} ${isComplete ? 'safe' : ''}`}></div>
+                                        {cat}
+                                    </div>
+                                    <span className="sidebar-count">{catAnswered}/{catQuestions.length}</span>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                    <div className="sidebar-divider"></div>
+                    <div className="sidebar-stats">
+                        <div>
+                            <span className="stat-val">{answered}</span>
+                            <span className="section-label">CEVAPLANAN (ANSWERED)</span>
                         </div>
-                    );
-                })}
-                <div className="sidebar-stats">
-                    <div className="sidebar-stat">
-                        <span className="s-num">{answered}</span>
-                        <span className="s-label">Cevaplanan</span>
+                        <div>
+                            <span className="stat-val">{questions.length - answered}</span>
+                            <span className="section-label">KALAN (REMAINING)</span>
+                        </div>
                     </div>
-                    <div className="sidebar-stat">
-                        <span className="s-num">{questions.length - answered}</span>
-                        <span className="s-label">Kalan</span>
-                    </div>
-                </div>
-            </aside>
+                </aside>
 
-            {/* Main */}
-            <div className="quiz-main">
-                {/* Progress */}
-                <div className="quiz-progress-wrap">
-                    <div className="quiz-progress-info">
-                        <span className="progress-label">İlerleme</span>
-                        <span className="progress-pct">{Math.round(progress)}%</span>
+                <main className="main-content">
+                    <div className="breadcrumb">
+                        {current.categoryName} › {current.typeName}
                     </div>
-                    <div className="progress-bar-wrap">
-                        <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
-                    </div>
-                </div>
 
-                {/* Current category label */}
-                <div className="quiz-cat-label">{current.categoryName} › {current.typeName}</div>
+                    <QuestionCard
+                        key={current.id}
+                        question={current}
+                        value={answers[current.id]}
+                        onChange={handleAnswer}
+                        index={currentIdx}
+                        total={questions.length}
+                    />
 
-                {/* Question */}
-                <QuestionCard
-                    key={current.id}
-                    question={current}
-                    value={answers[current.id]}
-                    onChange={handleAnswer}
-                    index={currentIdx}
-                    total={questions.length}
-                />
-
-                {/* Navigation */}
-                <div className="quiz-nav">
-                    <button id="prev-btn" className="btn btn-secondary" onClick={handlePrev} disabled={currentIdx === 0}>
-                        ← Önceki
-                    </button>
-                    <div className="quiz-nav-center">
-                        <span className="nav-hint">
-                            {answers[current.id] === undefined ? '⬡ Henüz cevap verilmedi' : '✓ Cevap kaydedildi'}
-                        </span>
-                    </div>
-                    {!isLast ? (
-                        <button id="next-btn" className="btn btn-primary" onClick={handleNext}>
-                            Sonraki →
+                    <div className="nav-row">
+                        <button className="btn-prev" onClick={handlePrev} disabled={currentIdx === 0}>
+                            ← Önceki (Previous)
                         </button>
-                    ) : (
-                        <button
-                            id="submit-btn"
-                            className="btn btn-primary"
-                            onClick={handleSubmit}
-                            disabled={submitting || answered === 0}
-                        >
-                            {submitting ? '⏳ Analiz ediliyor...' : '🎯 Analizi Tamamla'}
-                        </button>
-                    )}
-                </div>
+                        <div className="nav-center">
+                            <div className="status-dot"></div>
+                            <span>{answers[current.id] === undefined ? 'Henüz cevap verilmedi' : 'Cevap kaydedildi'}</span>
+                        </div>
+                        <div className="nav-actions">
+                            {!isLast && answered > 0 && (
+                                <button 
+                                    className={`btn ${isLastOfType ? 'btn-secondary-highlight' : 'btn-secondary'}`} 
+                                    onClick={handleSubmit} 
+                                    disabled={submitting} 
+                                    style={{ marginRight: '8px' }}
+                                >
+                                    {submitting ? '...' : 'Analizi Tamamla'}
+                                </button>
+                            )}
+                            {!isLast ? (
+                                <button className="btn btn-primary" onClick={handleNext}>
+                                    Sonraki (Next) →
+                                </button>
+                            ) : (
+                                <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>
+                                    {submitting ? 'Analiz ediliyor...' : '🎯 Sonuçları Gör (Show Results)'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </main>
             </div>
         </div>
     );

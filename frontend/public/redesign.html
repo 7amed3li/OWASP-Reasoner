@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Reasoner | Startup Grade Redesign</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Background layers */
+            --bg-base: #080C10;
+            --bg-surface: #0E1318;
+            --bg-raised: #141B23;
+            --bg-hover: #1A2330;
+
+            /* Accent colors */
+            --accent: #0EA5E9;
+            --purple: #8B5CF6;
+
+            /* Severity colors */
+            --critical: #EF4444;
+            --high: #F97316;
+            --medium: #EAB308;
+            --low: #60A5FA;
+            --safe: #10B981;
+
+            /* Text opacity scale */
+            --text-primary: rgba(255, 255, 255, 0.92);
+            --text-secondary: rgba(255, 255, 255, 0.50);
+            --text-tertiary: rgba(255, 255, 255, 0.28);
+
+            /* Borders */
+            --border: rgba(255, 255, 255, 0.07);
+            --border-hover: rgba(255, 255, 255, 0.12);
+
+            /* Transitions */
+            --transition: 150ms ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-size: 15px;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .mono {
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* ── Typography ── */
+        h1 { font-size: 42px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; }
+        h2 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+        h3 { font-size: 17px; font-weight: 600; }
+        .label-meta { font-size: 13px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); }
+        .section-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-tertiary); letter-spacing: 0.1em; text-transform: uppercase; }
+
+        /* ── Layout ── */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 48px;
+        }
+
+        .navbar {
+            height: 60px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(8, 12, 16, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+        }
+
+        .logo-mark {
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .logo-mark::after {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 2px solid var(--bg-base);
+            border-radius: 2px;
+        }
+
+        .logo span { color: var(--accent); }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .engine-pill {
+            background: rgba(139, 92, 246, 0.12);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            color: var(--purple);
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .engine-pill::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--purple);
+            border-radius: 50%;
+        }
+
+        .docs-link {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .docs-link:hover { color: var(--text-primary); }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn:active { transform: scale(0.98); }
+
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { opacity: 0.9; }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-secondary);
+        }
+        .btn-secondary:hover { border-color: rgba(255, 255, 255, 0.25); color: var(--text-primary); }
+
+        /* ── Sections ── */
+        section { display: none; }
+        section.active { display: block; }
+
+        /* ── Page 1: Home ── */
+        .hero { padding: 96px 0 80px; text-align: center; max-width: 800px; margin: 0 auto; }
+        .eyebrow {
+            display: inline-flex;
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            color: var(--accent);
+            background: rgba(14, 165, 233, 0.1);
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            padding: 4px 12px;
+            border-radius: 100px;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 span { color: var(--accent); }
+        .hero-subtitle {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin: 24px auto 32px;
+            max-width: 480px;
+        }
+
+        .cta-row { display: flex; justify-content: center; gap: 12px; }
+
+        .how-it-works { padding: 64px 0; }
+        .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+        .step-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            padding: 24px;
+            border-radius: 14px;
+            transition: var(--transition);
+        }
+
+        .step-num { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--accent); margin-bottom: 16px; }
+        .step-title { margin-bottom: 8px; }
+        .step-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+        .coverage { padding: 64px 0; }
+        .coverage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 32px; }
+        .cat-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--severity);
+            padding: 20px 24px;
+            border-radius: 0 14px 14px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .cat-card:hover { background: var(--bg-raised); border-color: var(--border-hover); transform: translateY(-1px); }
+        .cat-info { display: flex; flex-direction: column; }
+        .cat-id { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-tertiary); }
+        .cat-name { font-size: 15px; font-weight: 600; margin-top: 4px; }
+        .cat-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+        
+        .cat-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        .badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(var(--severity-rgb), 0.12);
+            border: 1px solid rgba(var(--severity-rgb), 0.2);
+            color: var(--severity);
+            text-transform: uppercase;
+        }
+        .rule-count { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-tertiary); }
+
+        /* ── Page 2: Analysis ── */
+        .analysis-progress { height: 3px; background: rgba(255, 255, 255, 0.08); position: relative; }
+        .progress-fill { height: 100%; background: var(--accent); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .progress-labels { display: flex; justify-content: space-between; padding: 8px 48px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-secondary); }
+
+        .analysis-layout { display: flex; max-width: 1100px; margin: 0 auto; min-height: calc(100vh - 100px); }
+        .sidebar {
+            width: 260px;
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border);
+            padding: 24px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-list { list-style: none; margin-top: 16px; }
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 2px;
+        }
+
+        .sidebar-item:hover { background: var(--bg-raised); color: var(--text-primary); }
+        .sidebar-item.active { background: var(--bg-raised); border-left: 2px solid var(--accent); color: var(--accent); }
+        
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-tertiary); margin-right: 12px; }
+        .status-dot.active { background: var(--accent); }
+        .status-dot.safe { background: var(--safe); }
+
+        .sidebar-item-left { display: flex; align-items: center; }
+        .sidebar-count { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-tertiary); }
+
+        .sidebar-divider { height: 1px; background: var(--border); margin: 24px 0; }
+        .sidebar-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .stat-val { font-size: 22px; font-weight: 600; display: block; }
+
+        .main-content { flex: 1; padding: 32px 40px; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-tertiary); margin-bottom: 24px; }
+
+        .q-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 14px; padding: 32px; }
+        .q-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .v-tag {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--purple);
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .q-counter { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text-tertiary); }
+
+        .q-text { font-size: 20px; font-weight: 600; line-height: 1.5; margin-top: 20px; }
+
+        .evidence-box {
+            margin-top: 20px;
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ev-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-tertiary); margin-bottom: 2px; }
+        .ev-name { font-size: 14px; color: var(--text-secondary); }
+        .weight-pill {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            color: var(--medium);
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .answers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 24px; }
+        .answer-btn {
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .answer-btn:hover { border-color: var(--accent); background: var(--bg-hover); }
+        .answer-btn:active { transform: scale(0.98); }
+        .answer-btn svg { width: 16px; height: 16px; }
+        .answer-btn span { font-size: 14px; font-weight: 600; }
+
+        .answer-btn.evet.selected { border-color: var(--safe); background: rgba(16, 185, 129, 0.06); }
+        .answer-btn.hayir.selected { border-color: var(--critical); background: rgba(239, 68, 68, 0.06); }
+        .answer-btn.atla.selected { border-color: var(--accent); background: rgba(14, 165, 233, 0.06); }
+
+        .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+        .btn-prev { color: var(--text-secondary); font-size: 14px; background: none; border: none; cursor: pointer; }
+        .nav-center { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-tertiary); }
+
+        /* ── Page 3: Results ── */
+        .results-page { max-width: 900px; margin: 0 auto; padding: 48px; }
+        .result-hero {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px;
+            display: flex;
+            gap: 48px;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .score-ring { width: 88px; height: 88px; position: relative; }
+        .score-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .ring-bg { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 4; }
+        .ring-progress { fill: none; stroke: var(--severity); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 264; stroke-dashoffset: 264; transition: stroke-dashoffset 1s ease-out; }
+        .score-content {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .score-num { font-size: 28px; font-weight: 600; line-height: 1; }
+        .score-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-tertiary); margin-top: 2px; }
+
+        .result-text-content { flex: 1; }
+        .res-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.08em; }
+        .res-severity { font-size: 38px; font-weight: 600; color: var(--severity); margin-top: 4px; line-height: 1; }
+        .res-stats { display: flex; gap: 32px; margin-top: 16px; }
+        .res-stat-num { font-size: 24px; font-weight: 600; color: white; display: block; }
+        .res-stat-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-tertiary); }
+        .res-summary { font-size: 15px; color: var(--text-secondary); margin-top: 16px; max-width: 480px; }
+
+        .v-group-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 16px; overflow: hidden; }
+        .v-group-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .v-item { padding: 16px 24px; border-bottom: 1px solid var(--border); }
+        .v-item:last-child { border-bottom: none; }
+        
+        .v-item-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .v-score-bar { width: 80px; height: 4px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; position: relative; margin-top: 6px; }
+        .v-score-fill { height: 100%; background: var(--severity); border-radius: 2px; }
+
+        .v-item-title { font-size: 15px; font-weight: 600; margin-top: 8px; }
+        .v-sub-section { margin-top: 12px; }
+        .v-sub-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-tertiary); margin-bottom: 8px; display: block; }
+        
+        .symptom-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 14px; color: var(--text-secondary); }
+        .w-badge { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--accent); color: white; padding: 1px 6px; border-radius: 3px; }
+
+        .rec-item { font-size: 14px; color: var(--text-secondary); border-left: 2px solid var(--safe); padding-left: 10px; margin-bottom: 6px; }
+
+        .safe-celebration { text-align: center; padding: 64px 48px; background: var(--bg-surface); border: 1px solid var(--safe); border-radius: 20px; }
+        .safe-icon { width: 48px; height: 48px; background: var(--safe); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+        .safe-icon svg { width: 24px; height: 24px; color: var(--bg-base); }
+        .safe-title { font-size: 26px; font-weight: 600; margin-top: 20px; }
+        
+        .passed-categories { margin-top: 48px; }
+        .passed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+        .passed-card { background: var(--bg-surface); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
+        .passed-card svg { width: 16px; height: 16px; color: var(--safe); flex-shrink: 0; }
+        .passed-name { font-size: 14px; font-weight: 600; }
+
+        .footer { text-align: center; margin-top: 48px; padding-bottom: 48px; }
+
+        /* ── Utility ── */
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .v-center { display: flex; align-items: center; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-inner">
+            <a href="#" class="logo" onclick="showPage('home')">
+                <div class="logo-mark"></div>
+                OWASP <span>Reasoner</span>
+            </a>
+            <div class="nav-right">
+                <div class="engine-pill">İleri Zincirleme Motoru</div>
+                <a href="#" class="docs-link">Docs</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PAGE 1: HOME -->
+    <section id="home-page" class="active">
+        <div class="container">
+            <div class="hero">
+                <div class="eyebrow">Forward Chaining Inference</div>
+                <h1>Web Application<br><span>Security Analysis</span></h1>
+                <p class="hero-subtitle">
+                    Analyze your application against OWASP Top 10 standards using a professional forward chaining inference engine.
+                </p>
+                <div class="cta-row">
+                    <button class="btn btn-primary" onclick="showPage('analysis')">Start Analysis</button>
+                    <a href="https://owasp.org/Top10/" target="_blank" class="btn btn-secondary">OWASP Documentation</a>
+                </div>
+            </div>
+
+            <div class="how-it-works">
+                <div class="section-label">HOW IT WORKS</div>
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-num">01</div>
+                        <h3 class="step-title">Evidence Collection</h3>
+                        <p class="step-desc">The system asks targeted questions about your application's behavior and architecture.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">02</div>
+                        <h3 class="step-title">Rule Evaluation</h3>
+                        <p class="step-desc">Each answer is matched against the inference engine's rule base to accumulate evidence.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">03</div>
+                        <h3 class="step-title">Risk Classification</h3>
+                        <p class="step-desc">Vulnerabilities are classified by OWASP category and weighted severity score.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="coverage">
+                <div class="section-label">COVERED VULNERABILITY CATEGORIES</div>
+                <div class="coverage-grid" id="coverage-grid">
+                    <!-- Categories will be injected here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PAGE 2: ANALYSIS -->
+    <section id="analysis-page">
+        <div class="analysis-progress">
+            <div id="progress-fill" class="progress-fill" style="width: 2%;"></div>
+        </div>
+        <div class="progress-labels">
+            <span>İlerleme</span>
+            <span id="progress-pct">2%</span>
+        </div>
+
+        <div class="analysis-layout">
+            <aside class="sidebar">
+                <div class="section-label">CATEGORIES</div>
+                <ul class="sidebar-list" id="sidebar-list">
+                    <!-- Categories injected here -->
+                </ul>
+                <div class="sidebar-divider"></div>
+                <div class="sidebar-stats">
+                    <div>
+                        <span class="stat-val">0</span>
+                        <span class="section-label">CEVAPLANAN</span>
+                    </div>
+                    <div>
+                        <span class="stat-val">61</span>
+                        <span class="section-label">KALAN</span>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="main-content">
+                <div class="breadcrumb">
+                    Broken Access Control › Insecure Direct Object Reference (IDOR)
+                </div>
+
+                <div class="q-card">
+                    <div class="q-header">
+                        <div class="v-tag">INSECURE DIRECT OBJECT REFERENCE (IDOR)</div>
+                        <div class="q-counter">1 / 61</div>
+                    </div>
+                    <p class="q-text">
+                        URL veya parametrelerde kullanıcı/kayıt ID'si gibi tahmin edilebilir sayısal değerler var mı? (Örn: /profile?id=42)
+                    </p>
+                    <div class="evidence-box">
+                        <div>
+                            <div class="ev-label">BELİRTİ</div>
+                            <div class="ev-name">Predictable Direct Object Reference</div>
+                        </div>
+                        <div class="weight-pill">Ağırlık: 3</div>
+                    </div>
+
+                    <div class="answers-grid">
+                        <div class="answer-btn evet" onclick="selectAnswer(this, 'evet')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>Evet</span>
+                        </div>
+                        <div class="answer-btn hayir" onclick="selectAnswer(this, 'hayir')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            <span>Hayır</span>
+                        </div>
+                        <div class="answer-btn atla" onclick="selectAnswer(this, 'atla')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <span>Atla</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-row">
+                    <button class="btn-prev">← Önceki</button>
+                    <div class="nav-center">
+                        <div class="status-dot"></div>
+                        <span>Henüz cevap verilmedi</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="showPage('results')">Sonraki →</button>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- PAGE 3: RESULTS -->
+    <section id="results-page">
+        <div class="results-page">
+            <div class="result-hero" style="--severity: var(--critical)">
+                <div class="score-ring">
+                    <svg class="score-svg" viewBox="0 0 100 100">
+                        <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
+                        <circle id="score-ring-progress" class="ring-progress" cx="50" cy="50" r="42"></circle>
+                    </svg>
+                    <div class="score-content">
+                        <span class="score-num">85</span>
+                        <span class="score-label">RISK</span>
+                    </div>
+                </div>
+                <div class="result-text-content">
+                    <div class="res-eyebrow">VULNERABILITY ANALYSIS</div>
+                    <h2 class="res-severity">CRITICAL</h2>
+                    <div class="res-stats">
+                        <div>
+                            <span class="res-stat-num">4</span>
+                            <span class="res-stat-label">ISSUES</span>
+                        </div>
+                        <div>
+                            <span class="res-stat-num">10</span>
+                            <span class="res-stat-label">CATEGORIES</span>
+                        </div>
+                        <div>
+                            <span class="res-stat-num">61</span>
+                            <span class="res-stat-label">RULES</span>
+                        </div>
+                    </div>
+                    <p class="res-summary">
+                        Multiple high-severity security flaws were detected that could lead to unauthorized data access and complete system compromise.
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-label" style="margin-bottom: 24px;">DETECTED VULNERABILITIES</div>
+            
+            <div id="vulnerabilities-list">
+                <!-- Vulnerability cards injected here -->
+            </div>
+
+            <div class="passed-categories">
+                <div class="section-label">PASSED CATEGORIES</div>
+                <div class="passed-grid" id="passed-grid">
+                    <!-- Passed categories injected here -->
+                </div>
+            </div>
+
+            <div class="footer">
+                <button class="btn btn-primary" style="padding: 14px 32px;" onclick="showPage('home')">New Analysis</button>
+                <div class="section-label" style="margin-top: 16px; letter-spacing: 0;">
+                    Analysis: 28.04.2026 09:53 · Engine: Forward Chaining Inference
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const CATEGORIES = [
+            { id: 'A01:2021', name: 'Broken Access Control', subtitle: 'Unauthorized data access', severity: 'critical', rgb: '239, 68, 100', rules: 12 },
+            { id: 'A02:2021', name: 'Cryptographic Failures', subtitle: 'Weak or missing encryption', severity: 'critical', rgb: '239, 68, 100', rules: 8 },
+            { id: 'A03:2021', name: 'Injection', subtitle: 'Untrusted data as commands', severity: 'critical', rgb: '239, 68, 100', rules: 15 },
+            { id: 'A04:2021', name: 'Insecure Design', subtitle: 'Missing security architecture', severity: 'high', rgb: '249, 115, 22', rules: 6 },
+            { id: 'A05:2021', name: 'Security Misconfiguration', subtitle: 'Exposed defaults and errors', severity: 'high', rgb: '249, 115, 22', rules: 10 },
+            { id: 'A06:2021', name: 'Vulnerable Components', subtitle: 'Outdated dependencies', severity: 'medium', rgb: '234, 179, 8', rules: 5 },
+            { id: 'A07:2021', name: 'Auth Failures', subtitle: 'Broken login and session management', severity: 'high', rgb: '249, 115, 22', rules: 9 },
+            { id: 'A08:2021', name: 'Data Integrity Failures', subtitle: 'Unverified software updates', severity: 'high', rgb: '249, 115, 22', rules: 7 },
+            { id: 'A09:2021', name: 'Logging Failures', subtitle: 'Missing security event records', severity: 'medium', rgb: '234, 179, 8', rules: 4 },
+            { id: 'A10:2021', name: 'SSRF', subtitle: 'Server-side request forgery', severity: 'high', rgb: '249, 115, 22', rules: 5 }
+        ];
+
+        function init() {
+            renderCoverage();
+            renderSidebar();
+            renderVulnerabilities();
+            renderPassed();
+        }
+
+        function renderCoverage() {
+            const grid = document.getElementById('coverage-grid');
+            grid.innerHTML = CATEGORIES.map(cat => `
+                <a href="#" class="cat-card" style="--severity: var(--${cat.severity}); --severity-rgb: ${cat.rgb}" onclick="showPage('analysis')">
+                    <div class="cat-info">
+                        <span class="cat-id">${cat.id}</span>
+                        <span class="cat-name">${cat.name}</span>
+                        <span class="cat-subtitle">${cat.subtitle}</span>
+                    </div>
+                    <div class="cat-right">
+                        <span class="badge">${cat.severity}</span>
+                        <span class="rule-count">${cat.rules} rules</span>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function renderSidebar() {
+            const list = document.getElementById('sidebar-list');
+            list.innerHTML = CATEGORIES.map((cat, i) => `
+                <li class="sidebar-item ${i === 0 ? 'active' : ''}">
+                    <div class="sidebar-item-left">
+                        <div class="status-dot ${i === 0 ? 'active' : ''}"></div>
+                        ${cat.name}
+                    </div>
+                    <span class="sidebar-count">0/10</span>
+                </li>
+            `).join('');
+        }
+
+        function renderVulnerabilities() {
+            const list = document.getElementById('vulnerabilities-list');
+            list.innerHTML = `
+                <div class="v-group-card">
+                    <div class="v-group-header">
+                        <div>
+                            <div class="mono" style="font-size: 12px; color: var(--text-tertiary)">A01:2021</div>
+                            <div style="font-size: 17px; font-weight: 600;">Broken Access Control</div>
+                        </div>
+                        <div style="text-align: right">
+                            <span class="badge" style="--severity: var(--critical); --severity-rgb: 239, 68, 100">critical</span>
+                            <div class="mono" style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">2 zafiyet tipi</div>
+                        </div>
+                    </div>
+                    <div class="v-item" style="--severity: var(--critical)">
+                        <div class="v-item-top">
+                            <div>
+                                <div class="mono" style="font-size: 12px; color: var(--text-tertiary)">R-IDOR-01</div>
+                                <div class="mono" style="font-size: 12px; color: var(--text-tertiary)">CWE-639</div>
+                            </div>
+                            <div class="v-score-bar">
+                                <div class="v-score-fill" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        <div class="v-item-title">Insecure Direct Object Reference (IDOR)</div>
+                        <div class="v-sub-section">
+                            <span class="v-sub-label">SYMPTOMS DETECTED</span>
+                            <div class="symptom-row">
+                                <span>Predictable Direct Object Reference</span>
+                                <span class="w-badge">+3</span>
+                            </div>
+                            <div class="symptom-row">
+                                <span>Missing Object Level Authorization</span>
+                                <span class="w-badge">+3</span>
+                            </div>
+                        </div>
+                        <div class="v-sub-section">
+                            <span class="v-sub-label">RECOMMENDATIONS</span>
+                            <div class="rec-item">Implement indirect reference maps (session-based)</div>
+                            <div class="rec-item">Enforce per-user object level authorization checks</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPassed() {
+            const grid = document.getElementById('passed-grid');
+            const passed = CATEGORIES.slice(4, 7);
+            grid.innerHTML = passed.map(cat => `
+                <div class="passed-card">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <div>
+                        <div class="passed-name">${cat.name}</div>
+                        <div class="cat-id">${cat.id}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.getElementById(pageId + '-page').classList.add('active');
+            window.scrollTo(0, 0);
+
+            if (pageId === 'results') {
+                setTimeout(() => {
+                    const ring = document.getElementById('score-ring-progress');
+                    // 264 is the circumference for r=42 (2 * pi * 42)
+                    // score 85 -> 85% of 264 -> offset = 264 * (1 - 0.85)
+                    ring.style.strokeDashoffset = 264 * (1 - 0.85);
+                }, 100);
+            }
+        }
+
+        function selectAnswer(btn, type) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        init();
+    </script>
+</body>
+</html>

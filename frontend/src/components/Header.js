@@ -3,15 +3,15 @@ import './Header.css';
 
 export default function Header({ page, onHome }) {
     return (
-        <header className="header">
-            <div className="container header-inner">
+        <header className="navbar">
+            <div className="nav-inner">
                 <button className="logo" onClick={onHome}>
-                    <span className="logo-icon">🛡️</span>
-                    <span className="logo-text">OWASP <span className="accent">Reasoner</span></span>
+                    <div className="logo-mark"></div>
+                    OWASP <span>Reasoner</span>
                 </button>
-                <div className="header-meta">
-                    <span className="engine-tag">⚡ İleri Zincirleme Motoru</span>
-                    {page && <span className="page-tag">{page}</span>}
+                <div className="nav-right">
+                    <div className="engine-pill">İleri Zincirleme Motoru</div>
+                    <a href="https://owasp.org/Top10/" target="_blank" rel="noreferrer" className="docs-link">Docs</a>
                 </div>
             </div>
         </header>

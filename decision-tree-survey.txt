@@ -1,0 +1,206 @@
+flowchart TD
+    START(["🔍 OWASP Uzman Sistem\nAnket Tabanlı Karar Ağacı\n5 Zafiyet · 13 Katılımcı · 35 Soru"])
+    START --> CAT{"Hangi Güvenlik\nKategorisini\nAnaliz Ediyorsun?"}
+
+    %% ============================================
+    %% 5 CATEGORIES
+    %% ============================================
+    CAT --> A03_SQL["🔴 A03:2021 Injection\nKategori Ort: 2.91/4"]
+    CAT --> A01["🔴 A01:2021\nBroken Access Control\nKategori Ort: 2.86/4"]
+    CAT --> A03_XSS["🟠 A03:2021 Injection\nKategori Ort: 2.88/4"]
+    CAT --> A07["🟠 A07:2021\nAuthentication Failures\nKategori Ort: 2.80/4"]
+    CAT --> A05["🟡 A05:2021\nSecurity Misconfiguration\nKategori Ort: 3.01/4"]
+
+    %% ============================================
+    %% CATEGORY → ZAFIYET TÜRÜ
+    %% ============================================
+    A03_SQL --> SQLI_TYPE["📋 Zafiyet Türü:\nSQL Injection\nR-SQLI-01 · CWE-89\n7 Anket Sorusu · Eşik ≥ 4"]
+
+    A01 --> A01_TUR{"Zafiyet Türü?"}
+    A01_TUR --> IDOR_TYPE["📋 IDOR\nR-IDOR-01 · CWE-639\n4 Anket Sorusu · Eşik ≥ 5"]
+    A01_TUR --> FB_TYPE["📋 Forced Browsing\nR-FB-01 · CWE-425\n3 Anket Sorusu · Eşik ≥ 5"]
+
+    A03_XSS --> XSS_TYPE["📋 Zafiyet Türü:\nCross-Site Scripting\nR-XSS-01 · CWE-79\n7 Anket Sorusu · Eşik ≥ 3"]
+
+    A07 --> A07_TUR{"Zafiyet Türü?"}
+    A07_TUR --> WAUTH_TYPE["📋 Weak Authentication\nR-AUTH-01 · CWE-287\n3 Anket Sorusu · Eşik ≥ 4"]
+    A07_TUR --> SF_TYPE["📋 Session Fixation\nR-AUTH-02 · CWE-384\n2 Anket Sorusu · Eşik ≥ 4"]
+    A07_TUR --> WPR_TYPE["📋 Weak Password Recovery\nR-AUTH-03 · CWE-640\n2 Anket Sorusu · Eşik ≥ 4"]
+
+    A05 --> A05_TUR{"Zafiyet Türü?"}
+    A05_TUR --> DBG_TYPE["📋 Exposed Debug Info\nR-MC-01 · CWE-215\n3 Anket Sorusu · Eşik ≥ 4"]
+    A05_TUR --> CFG_TYPE["📋 Default Configuration\nR-MC-02 · CWE-16\n4 Anket Sorusu · Eşik ≥ 4"]
+
+    %% ============================================
+    %% 1. SQL INJECTION (R-SQLI-01)
+    %% Sorular: S1-S7
+    %% ============================================
+    SQLI_TYPE --> SQ7{"S7: Veritabanı hesabı admin\nyetkisine sahiptir; en düşük\nyetki prensibi uygulanmamaktadır.\n📊 Ort: 3.15/4 · W=3"}
+    SQ7 -->|"Evet (+3)"| SQ6{"S6: UNION SELECT komutu\nkullanılarak kullanıcıların\nşifre hash'leri elde\nedilebilmektedir.\n📊 Ort: 3.08/4 · W=3"}
+    SQ7 -->|"Hayır (+0)"| SQ6
+    SQ6 -->|"Evet (+3)"| SQ5{"S5: Sıradan bir form alanına\ngirdi yapılarak veritabanındaki\nkayıtlar silinebilmektedir.\n📊 Ort: 3.00/4 · W=3"}
+    SQ6 -->|"Hayır (+0)"| SQ5
+    SQ5 -->|"Evet (+3)"| SQ1{"S1: Kullanıcı, arama kutusuna\n' OR 1=1 -- yazarak tüm\nveritabanı kayıtlarına\nerişebilmektedir.\n📊 Ort: 2.92/4 · W=2"}
+    SQ5 -->|"Hayır (+0)"| SQ1
+    SQ1 -->|"Evet (+2)"| SQ2{"S2: Hata sayfasında SQL\nsözdizimi hatası ve tablo/sütun\nisimleri kullanıcıya\ngösterilmektedir.\n📊 Ort: 2.85/4 · W=3"}
+    SQ1 -->|"Hayır (+0)"| SQ2
+    SQ2 -->|"Evet (+3)"| SQ3{"S3: SQL sorguları, kullanıcıdan\ngelen metin doğrudan eklenerek\noluşturulmaktadır.\n📊 Ort: 2.85/4 · W=3"}
+    SQ2 -->|"Hayır (+0)"| SQ3
+    SQ3 -->|"Evet (+3)"| SQ4{"S4: Kodun hiçbir yerinde\nPrepared Statement veya\nORM kullanılmamaktadır.\n📊 Ort: 2.54/4 · W=3"}
+    SQ3 -->|"Hayır (+0)"| SQ4
+    SQ4 -->|"Evet (+3)"| SQLI_TH{"Toplam Skor ≥ 4?"}
+    SQ4 -->|"Hayır (+0)"| SQLI_TH
+    SQLI_TH -->|"✅ Evet"| SQLI_YES["🚨 SQL INJECTION\nTESPİT EDİLDİ\n\n• Prepared Statement kullan\n• Whitelist doğrulama uygula\n• DB yetkisini kısıtla\n• WAF kur"]
+    SQLI_TH -->|"❌ Hayır"| SQLI_NO["✅ SQL Injection\nRiski Düşük"]
+
+    %% ============================================
+    %% 2a. IDOR (R-IDOR-01)
+    %% Sorular: S8, S11, S9, S13
+    %% ============================================
+    IDOR_TYPE --> ID8{"S8: URL'deki id=42 değeri\nid=43 olarak değiştirildiğinde\nbaşka bir kullanıcının verileri\ngörüntülenebilmektedir.\n📊 Ort: 3.46/4 · W=3"}
+    ID8 -->|"Evet (+3)"| ID11{"S11: Sunucu, bir kaydı\ngüncellemeden önce o kaydın\ngerçekten oturum açmış\nkullanıcıya ait olup olmadığını\ndoğrulamamaktadır.\n📊 Ort: 3.08/4 · W=3"}
+    ID8 -->|"Hayır (+0)"| ID11
+    ID11 -->|"Evet (+3)"| ID9{"S9: Başka bir kullanıcıya ait\ndosya, dosya URL'si bilindiğinde\nherhangi biri tarafından\nindirilebilmektedir.\n📊 Ort: 2.92/4 · W=2"}
+    ID11 -->|"Hayır (+0)"| ID9
+    ID9 -->|"Evet (+2)"| ID13{"S13: Fatura numarası tahmin\nedilerek URL üzerinden\nbaşkasının faturasına\nulaşılabilmektedir.\n📊 Ort: 2.69/4 · W=3"}
+    ID9 -->|"Hayır (+0)"| ID13
+    ID13 -->|"Evet (+3)"| IDOR_TH{"Toplam Skor ≥ 5?"}
+    ID13 -->|"Hayır (+0)"| IDOR_TH
+    IDOR_TH -->|"✅ Evet"| IDOR_YES["🚨 IDOR TESPİT EDİLDİ\n\n• UUID kullan\n• Sunucu taraflı sahiplik doğrula\n• Her kaynak erişiminde\n  yetkilendirme kontrol et"]
+    IDOR_TH -->|"❌ Hayır"| IDOR_NO["✅ IDOR Riski Düşük"]
+
+    %% ============================================
+    %% 2b. FORCED BROWSING (R-FB-01)
+    %% Sorular: S12, S14, S10
+    %% ============================================
+    FB_TYPE --> FB12{"S12: Arayüz yalnızca butonları\nCSS ile gizlemekte, ancak\nsunucu tarafında herhangi bir\nyetki kontrolü yapılmamaktadır.\n📊 Ort: 2.69/4 · W=2"}
+    FB12 -->|"Evet (+2)"| FB14{"S14: /backup/db_export.sql gibi\nyedek dosyalara internet\nüzerinden herhangi biri\nerişebilmektedir.\n📊 Ort: 2.62/4 · W=3"}
+    FB12 -->|"Hayır (+0)"| FB14
+    FB14 -->|"Evet (+3)"| FB10{"S10: Giriş yapılmadan /admin\nveya /dashboard sayfasının\nURL'si yazılarak yönetim\npaneline erişilebilmektedir.\n📊 Ort: 2.54/4 · W=3"}
+    FB14 -->|"Hayır (+0)"| FB10
+    FB10 -->|"Evet (+3)"| FB_TH{"Toplam Skor ≥ 5?"}
+    FB10 -->|"Hayır (+0)"| FB_TH
+    FB_TH -->|"✅ Evet"| FB_YES["🚨 FORCED BROWSING\nTESPİT EDİLDİ\n\n• Sunucu taraflı yetki kontrolü\n• Middleware güvenlik filtresi\n• Hassas dizinleri kapat\n• Dizin listelemeyi devre dışı bırak"]
+    FB_TH -->|"❌ Hayır"| FB_NO["✅ Forced Browsing\nRiski Düşük"]
+
+    %% ============================================
+    %% 3. XSS (R-XSS-01)
+    %% Sorular: S15-S21
+    %% ============================================
+    XSS_TYPE --> XS21{"S21: Saldırgan, XSS açığı\naracılığıyla kullanıcıları kimlik\navı sitesine yönlendirebilmektedir.\n📊 Ort: 3.23/4 · W=3"}
+    XS21 -->|"Evet (+3)"| XS15{"S15: Yorum alanına\nscript alert XSS yazıldığında\nbu kod diğer ziyaretçilerin\ntarayıcısında çalışmaktadır.\n📊 Ort: 3.08/4 · W=3"}
+    XS21 -->|"Hayır (+0)"| XS15
+    XS15 -->|"Evet (+3)"| XS17{"S17: Saldırgan, XSS açığı\nsayesinde başka bir kullanıcının\noturum çerezini çalabilmektedir.\n📊 Ort: 3.08/4 · W=3"}
+    XS15 -->|"Hayır (+0)"| XS17
+    XS17 -->|"Evet (+3)"| XS16{"S16: Arama sonuç sayfası,\naranan kelimeyi HTML encode\netmeden doğrudan sayfaya\nyansıtmaktadır.\n📊 Ort: 2.92/4 · W=3"}
+    XS17 -->|"Hayır (+0)"| XS16
+    XS16 -->|"Evet (+3)"| XS18{"S18: Sitede herhangi bir\nContent-Security-Policy\nHTTP başlığı bulunmamaktadır.\n📊 Ort: 2.85/4 · W=2"}
+    XS16 -->|"Hayır (+0)"| XS18
+    XS18 -->|"Evet (+2)"| XS20{"S20: Arama sonuçları sayfası\nimg onerror gibi zararlı\netiketleri filtrelemeden\ngöstermektedir.\n📊 Ort: 2.62/4 · W=2"}
+    XS18 -->|"Hayır (+0)"| XS20
+    XS20 -->|"Evet (+2)"| XS19{"S19: Profil sayfasındaki\nAd Soyad alanı HTML içeriği\nkabul etmekte ve olduğu gibi\ngörüntülemektedir.\n📊 Ort: 2.38/4 · W=2"}
+    XS20 -->|"Hayır (+0)"| XS19
+    XS19 -->|"Evet (+2)"| XSS_TH{"Toplam Skor ≥ 3?"}
+    XS19 -->|"Hayır (+0)"| XSS_TH
+    XSS_TH -->|"✅ Evet"| XSS_YES["🚨 XSS TESPİT EDİLDİ\n\n• HTML encode uygula\n• CSP header ekle\n• Modern framework kullan\n• HTTPOnly cookie ayarla"]
+    XSS_TH -->|"❌ Hayır"| XSS_NO["✅ XSS Riski Düşük"]
+
+    %% ============================================
+    %% 4a. WEAK AUTHENTICATION (R-AUTH-01)
+    %% Sorular: S22, S23, S24
+    %% ============================================
+    WAUTH_TYPE --> AU22{"S22: Giriş sayfasına herhangi\nbir kısıtlama olmaksızın binlerce\nşifre denemesi yapılabilmektedir.\n📊 Ort: 2.85/4 · W=3"}
+    AU22 -->|"Evet (+3)"| AU23{"S23: Sistem 123456, password\nveya qwerty gibi son derece\nbasit şifreleri kabul etmektedir.\n📊 Ort: 2.77/4 · W=2"}
+    AU22 -->|"Hayır (+0)"| AU23
+    AU23 -->|"Evet (+2)"| AU24{"S24: Çok faktörlü kimlik\ndoğrulama MFA / 2FA seçeneği\nhiç sunulmamaktadır.\n📊 Ort: 2.69/4 · W=2"}
+    AU23 -->|"Hayır (+0)"| AU24
+    AU24 -->|"Evet (+2)"| WAUTH_TH{"Toplam Skor ≥ 4?"}
+    AU24 -->|"Hayır (+0)"| WAUTH_TH
+    WAUTH_TH -->|"✅ Evet"| WAUTH_YES["🚨 WEAK AUTH\nTESPİT EDİLDİ\n\n• Rate limiting uygula\n• MFA zorunlu kıl\n• Güçlü şifre politikası\n• Hesap kilitleme mekanizması"]
+    WAUTH_TH -->|"❌ Hayır"| WAUTH_NO["✅ Kimlik Doğrulama\nGüvenli"]
+
+    %% ============================================
+    %% 4b. SESSION FIXATION (R-AUTH-02)
+    %% Sorular: S26, S27
+    %% ============================================
+    SF_TYPE --> AU26{"S26: Kullanıcı giriş yaptıktan\nsonra oturum kimliği Session ID\ndeğişmemektedir.\n📊 Ort: 2.92/4 · W=4"}
+    AU26 -->|"Evet (+4)"| AU27{"S27: Önceden belirlenmiş bir\nSession ID, URL parametresi\nolarak sisteme\nenjekte edilebilmektedir.\n📊 Ort: 2.92/4 · W=3"}
+    AU26 -->|"Hayır (+0)"| AU27
+    AU27 -->|"Evet (+3)"| SF_TH{"Toplam Skor ≥ 4?"}
+    AU27 -->|"Hayır (+0)"| SF_TH
+    SF_TH -->|"✅ Evet"| SF_YES["🚨 SESSION FIXATION\nTESPİT EDİLDİ\n\n• Login sonrası Session\n  Regeneration uygula\n• HTTPOnly + Secure cookie\n• URL'de Session ID taşıma"]
+    SF_TH -->|"❌ Hayır"| SF_NO["✅ Oturum Yönetimi\nGüvenli"]
+
+    %% ============================================
+    %% 4c. WEAK PASSWORD RECOVERY (R-AUTH-03)
+    %% Sorular: S25, S28
+    %% ============================================
+    WPR_TYPE --> AU25{"S25: Şifre sıfırlama bağlantısı\n7 gün boyunca geçerliliğini\nkorumaktadır.\n📊 Ort: 3.00/4 · W=3"}
+    AU25 -->|"Evet (+3)"| AU28{"S28: Hesap kurtarma için\nAnnenizin kızlık soyadı gibi\nkolayca tahmin edilebilir\ngüvenlik soruları kullanılmaktadır.\n📊 Ort: 2.46/4 · W=3"}
+    AU25 -->|"Hayır (+0)"| AU28
+    AU28 -->|"Evet (+3)"| WPR_TH{"Toplam Skor ≥ 4?"}
+    AU28 -->|"Hayır (+0)"| WPR_TH
+    WPR_TH -->|"✅ Evet"| WPR_YES["🚨 WEAK RECOVERY\nTESPİT EDİLDİ\n\n• Token 15-30 dk ömürlü olsun\n• Tek kullanımlık token\n• E-posta/SMS kodu kullan\n• Güvenlik sorusu kullanma"]
+    WPR_TH -->|"❌ Hayır"| WPR_NO["✅ Kurtarma Mekanizması\nGüvenli"]
+
+    %% ============================================
+    %% 5a. EXPOSED DEBUG INFO (R-MC-01)
+    %% Sorular: S30, S29, S31
+    %% ============================================
+    DBG_TYPE --> MC30{"S30: Üretim ortamında debug\nmodu hâlâ etkin durumdadır.\n📊 Ort: 3.23/4 · W=3"}
+    MC30 -->|"Evet (+3)"| MC29{"S29: Bir hata oluştuğunda\nsayfada Stack Trace ve dahili\ndosya yolları görüntülenmektedir.\n📊 Ort: 2.77/4 · W=3"}
+    MC30 -->|"Hayır (+0)"| MC29
+    MC29 -->|"Evet (+3)"| MC31{"S31: Varsayılan kullanıcı adı\nve şifre admin / admin hiç\ndeğiştirilmemiştir.\n📊 Ort: 2.69/4 · W=3"}
+    MC29 -->|"Hayır (+0)"| MC31
+    MC31 -->|"Evet (+3)"| DBG_TH{"Toplam Skor ≥ 4?"}
+    MC31 -->|"Hayır (+0)"| DBG_TH
+    DBG_TH -->|"✅ Evet"| DBG_YES["🚨 DEBUG INFO AÇIK\nTESPİT EDİLDİ\n\n• Debug modunu kapat\n• Genel hata mesajları göster\n• Detayları sadece logla\n• Varsayılan şifreleri değiştir"]
+    DBG_TH -->|"❌ Hayır"| DBG_NO["✅ Debug Bilgisi\nGüvenli"]
+
+    %% ============================================
+    %% 5b. DEFAULT CONFIGURATION (R-MC-02)
+    %% Sorular: S33, S34, S35, S32
+    %% ============================================
+    CFG_TYPE --> MC33{"S33: Web sunucusu dizin\nlistelemeyi aktif bırakarak\nsunucu dosya yapısını\nifşa etmektedir.\n📊 Ort: 3.23/4 · W=3"}
+    MC33 -->|"Evet (+3)"| MC34{"S34: Veritabanı şifresi içeren\n.env dosyasına tarayıcı\nüzerinden erişilebilmektedir.\n📊 Ort: 3.23/4 · W=3"}
+    MC33 -->|"Hayır (+0)"| MC34
+    MC34 -->|"Evet (+3)"| MC35{"S35: Kullanılan kütüphaneler\nve bileşenler bilinen güvenlik\naçıkları içermesine rağmen\ngüncellenmemektedir.\n📊 Ort: 3.08/4 · W=2"}
+    MC34 -->|"Hayır (+0)"| MC35
+    MC35 -->|"Evet (+2)"| MC32{"S32: MySQL 3306, MongoDB\n27017 gibi veritabanı portları\ninternete açık durumdadır.\n📊 Ort: 2.85/4 · W=3"}
+    MC35 -->|"Hayır (+0)"| MC32
+    MC32 -->|"Evet (+3)"| CFG_TH{"Toplam Skor ≥ 4?"}
+    MC32 -->|"Hayır (+0)"| CFG_TH
+    CFG_TH -->|"✅ Evet"| CFG_YES["🚨 YAPILANDIRMA HATASI\nTESPİT EDİLDİ\n\n• Dizin listelemeyi kapat\n• .env dosyasını koru\n• Bileşenleri güncelle\n• Gereksiz portları kapat"]
+    CFG_TH -->|"❌ Hayır"| CFG_NO["✅ Yapılandırma\nGüvenli"]
+
+    %% ============================================
+    %% STYLING
+    %% ============================================
+    classDef startNode fill:#0f172a,stroke:#e94560,color:#fff,stroke-width:3px
+    classDef catDecision fill:#581c87,stroke:#c084fc,color:#fff,stroke-width:2px
+    classDef catCritical fill:#991b1b,stroke:#fca5a5,color:#fff,stroke-width:2px
+    classDef catHigh fill:#9a3412,stroke:#fdba74,color:#fff,stroke-width:2px
+    classDef catMedium fill:#854d0e,stroke:#fde047,color:#fff,stroke-width:2px
+    classDef typeNode fill:#1e3a5f,stroke:#7dd3fc,color:#fff,stroke-width:2px
+    classDef turDecision fill:#4c1d95,stroke:#a78bfa,color:#fff,stroke-width:2px
+    classDef questionNode fill:#1e293b,stroke:#64748b,color:#e2e8f0,stroke-width:1px
+    classDef thresholdNode fill:#312e81,stroke:#818cf8,color:#fff,stroke-width:2px
+    classDef detectNode fill:#7f1d1d,stroke:#f87171,color:#fff,stroke-width:3px
+    classDef safeNode fill:#14532d,stroke:#4ade80,color:#fff,stroke-width:2px
+
+    class START startNode
+    class CAT catDecision
+    class A03_SQL,A01 catCritical
+    class A03_XSS,A07 catHigh
+    class A05 catMedium
+    class SQLI_TYPE,IDOR_TYPE,FB_TYPE,XSS_TYPE,WAUTH_TYPE,SF_TYPE,WPR_TYPE,DBG_TYPE,CFG_TYPE typeNode
+    class A01_TUR,A07_TUR,A05_TUR turDecision
+    class SQ1,SQ2,SQ3,SQ4,SQ5,SQ6,SQ7 questionNode
+    class ID8,ID9,ID11,ID13 questionNode
+    class FB10,FB12,FB14 questionNode
+    class XS15,XS16,XS17,XS18,XS19,XS20,XS21 questionNode
+    class AU22,AU23,AU24,AU25,AU26,AU27,AU28 questionNode
+    class MC29,MC30,MC31,MC32,MC33,MC34,MC35 questionNode
+    class SQLI_TH,IDOR_TH,FB_TH,XSS_TH,WAUTH_TH,SF_TH,WPR_TH,DBG_TH,CFG_TH thresholdNode
+    class SQLI_YES,IDOR_YES,FB_YES,XSS_YES,WAUTH_YES,SF_YES,WPR_YES,DBG_YES,CFG_YES detectNode
+    class SQLI_NO,IDOR_NO,FB_NO,XSS_NO,WAUTH_NO,SF_NO,WPR_NO,DBG_NO,CFG_NO safeNode

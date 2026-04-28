@@ -3,42 +3,49 @@ import './QuestionCard.css';
 
 export default function QuestionCard({ question, value, onChange, index, total }) {
     return (
-        <div className="qcard fade-in-up">
-            <div className="qcard-meta">
-                <span className="qcard-type-badge">{question.typeName}</span>
-                <span className="qcard-counter">{index + 1} / {total}</span>
+        <div className="q-card">
+            <div className="q-header">
+                <div className="v-tag">{question.typeName}</div>
+                <div className="q-counter">{index + 1} / {total}</div>
+            </div>
+            
+            <p className="q-text">{question.question}</p>
+            
+            <div className="evidence-box">
+                <div>
+                    <div className="ev-label">BELİRTİ</div>
+                    <div className="ev-name">{question.symptom}</div>
+                </div>
+                <div className="weight-pill">Ağırlık: {question.weight}</div>
             </div>
 
-            <p className="qcard-question">{question.question}</p>
-
-            <div className="qcard-symptom">
-                <span className="symptom-label">Belirti:</span>
-                <span className="symptom-value">{question.symptom}</span>
-                <span className="symptom-weight" title="Etki ağırlığı">Ağırlık: {question.weight}</span>
-            </div>
-
-            <div className="qcard-answers">
+            <div className="answers-grid">
                 <button
-                    id={`q-${question.id}-yes`}
-                    className={`answer-btn answer-yes ${value === true ? 'selected' : ''}`}
+                    className={`answer-btn evet ${value === true ? 'selected' : ''}`}
                     onClick={() => onChange(question.id, true)}
                 >
-                    <span className="answer-icon">✓</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
                     <span>Evet</span>
                 </button>
                 <button
-                    id={`q-${question.id}-no`}
-                    className={`answer-btn answer-no ${value === false ? 'selected' : ''}`}
+                    className={`answer-btn hayir ${value === false ? 'selected' : ''}`}
                     onClick={() => onChange(question.id, false)}
                 >
-                    <span className="answer-icon">✗</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
                     <span>Hayır</span>
                 </button>
                 <button
-                    id={`q-${question.id}-skip`}
-                    className={`answer-btn answer-skip ${value === null ? 'selected' : ''}`}
+                    className={`answer-btn atla ${value === null ? 'selected' : ''}`}
                     onClick={() => onChange(question.id, null)}
                 >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
                     <span>Atla</span>
                 </button>
             </div>
