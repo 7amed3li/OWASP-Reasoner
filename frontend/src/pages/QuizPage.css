@@ -7,7 +7,7 @@
 /* Progress Header */
 .analysis-progress {
     height: 3px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(60, 30, 110, 0.08);
     position: relative;
     width: 100%;
 }

@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import './ResultsPage.css';
 
 const SEVERITY_MAP = {
-    critical: '#EF4444',
-    high: '#F97316',
-    medium: '#EAB308',
-    low: '#60A5FA',
-    safe: '#10B981',
+    critical: '#E11D48',
+    high: '#EA580C',
+    medium: '#D97706',
+    low: '#4F46E5',
+    safe: '#059669',
 };
 
 const SEVERITY_TR = {
@@ -56,7 +56,7 @@ function RuleTypeCard({ type, severityColor }) {
 }
 
 function FindingCard({ finding }) {
-    const severityColor = SEVERITY_MAP[finding.severity] || '#EAB308';
+    const severityColor = SEVERITY_MAP[finding.severity] || '#D97706';
     return (
         <div className="finding-group">
             <div className="finding-header">
@@ -115,7 +115,7 @@ export default function ResultsPage({ result, onRestart }) {
 
                 <div className="hero-middle">
                     <div className="res-eyebrow">ZAFİYET ANALİZİ</div>
-                    <h2 className="res-severity" style={{ color: isSafe ? 'white' : severityColor }}>
+                    <h2 className="res-severity" style={{ color: severityColor }}>
                         {SEVERITY_TR[riskLevel] || riskLevel.toUpperCase()}
                     </h2>
                     <p className="res-summary">{result.summary}</p>

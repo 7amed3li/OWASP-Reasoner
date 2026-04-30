@@ -6,7 +6,7 @@ export default function Header({ page, onHome }) {
         <header className="navbar">
             <div className="nav-inner">
                 <button className="logo" onClick={onHome}>
-                    <div className="logo-mark"></div>
+                    <img src="/logo.png" alt="OWASP Logo" className="logo-img" />
                     OWASP <span>Reasoner</span>
                 </button>
                 <div className="nav-right">
