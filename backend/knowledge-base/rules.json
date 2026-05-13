@@ -3,26 +3,26 @@
   "categories": [
     {
       "id": "A01:2021",
-      "name": "Broken Access Control",
+      "name": "Broken Access Control (Bozuk Erişim Kontrolü)",
       "severity": "critical",
       "description": "Erişim kontrolü kısıtlamalarını ihlal eden politikalar. Saldırganlar bu açıklardan yararlanarak yetkisiz işlemler yapabilir.",
       "types": [
         {
           "id": "R-BAC-01",
-          "name": "Erişim Kontrolü Hataları (Broken Access Control & IDOR)",
+          "name": "Erişim Kontrolü Hataları (Broken Access Control & IDOR (Dolaylı Nesne Referansı))",
           "cwe": "CWE-285",
           "description": "Yetki kontrollerinin sunucu tarafında eksik yapılması ve korumalı kaynaklara yetkisiz erişim sağlanması.",
           "indicators": [
             {
               "id": "S8",
               "question": "URL'deki id=42 değeri id=43 olarak değiştirildiğinde başka bir kullanıcının verileri görüntülenebilmektedir.",
-              "symptom": "Tahmin Edilebilir ve İstismar Edilen IDOR",
+              "symptom": "Tahmin Edilebilir ve İstismar Edilen IDOR (Dolaylı Nesne Referansı)",
               "weight": 4
             },
             {
               "id": "S9",
               "question": "Başka bir kullanıcıya ait dosya (fatura, rapor), dosya URL'si bilindiğinde herhangi biri tarafından indirilebilmektedir.",
-              "symptom": "Dosya Bazlı IDOR",
+              "symptom": "Dosya Bazlı IDOR (Dolaylı Nesne Referansı)",
               "weight": 4
             },
             {
@@ -64,7 +64,7 @@
             "Dizin listelemeyi (directory listing) sunucu yapılandırmasında devre dışı bırakın.",
             "Tüm korumalı sayfalarda sunucu taraflı kimlik doğrulaması ve yetkilendirme kontrolü uygulayın.",
             "URL tabanlı erişim kontrolü için merkezi bir güvenlik filtresi (middleware) kullanın.",
-            "Doğrudan ID yerine tahmin edilemez referanslar kullanın (UUID, kripto token).",
+            "Doğrudan ID yerine tahmin edilemez referanslar kullanın (UUID (Evrensel Benzersiz Tanımlayıcı), kripto token (belirteç)).",
             "Erişim reddedildiğinde loglama ve uyarı mekanizması kurun.",
             "Tüm yetkisiz erişim denemelerini loglayın.",
             "Sunucu tarafında nesne sahipliği doğrulayın (session'daki kullanıcı ID'si ile kayıt sahibini karşılaştırın)."
@@ -81,13 +81,13 @@
     },
     {
       "id": "A02:2021",
-      "name": "Cryptographic Failures",
+      "name": "Cryptographic Failures (Kriptografik Hatalar)",
       "severity": "critical",
       "description": "Hassas verilerin şifreleme olmadan veya zayıf şifreleme ile korunması.",
       "types": [
         {
           "id": "R-CF-01",
-          "name": "Weak Password Hashing",
+          "name": "Weak Password Hashing (Zayıf Parola Hashleme)",
           "cwe": "CWE-916",
           "description": "Şifrelerin MD5, SHA-1 gibi hız odaklı ve kriptografik açıdan yetersiz algoritmalarla hashlenmesi.",
           "indicators": [
@@ -124,7 +124,7 @@
         },
         {
           "id": "R-CF-02",
-          "name": "Use of Hard-coded Password",
+          "name": "Use of Hard-coded Password (Kod İçinde Sabitlenmiş Şifre Kullanımı)",
           "cwe": "CWE-259",
           "description": "Uygulamanın kaynak kodunda veya konfigürasyon dosyalarında sabit (hard-coded) şifrelerin kullanılması.",
           "indicators": [
@@ -150,7 +150,7 @@
           "threshold": 4,
           "owasp_ref": "A02:2021",
           "remediation": [
-            "Şifreleri ve anahtarları ortam değişkenlerinde (Environment Variables) veya güvenli Vault sistemlerinde saklayın.",
+            "Şifreleri ve anahtarları ortam değişkenlerinde (Environment Variables (Ortam Değişkenleri)) veya güvenli Vault (Kasa) sistemlerinde saklayın.",
             "Git reposuna hassas dosyaları eklememek için .gitignore kullanın.",
             "Kod tarama araçları ile hard-coded şifreleri tespit edin."
           ],
@@ -161,13 +161,13 @@
         },
         {
           "id": "R-CF-03",
-          "name": "Insufficient Entropy",
+          "name": "Insufficient Entropy (Yetersiz Entropi)",
           "cwe": "CWE-331",
-          "description": "Kriptografik anahtarların, token'ların veya oturum ID'lerinin yeterli rastgelelikte (entropy) üretilmemesi.",
+          "description": "Kriptografik anahtarların, token (belirteç)'ların veya oturum ID'lerinin yeterli rastgelelikte (entropy) üretilmemesi.",
           "indicators": [
             {
               "id": "CF03-S1",
-              "question": "Şifre sıfırlama token'ları Math.random() gibi tahmin edilebilir/kriptografik olmayan fonksiyonlarla mı üretiliyor?",
+              "question": "Şifre sıfırlama token (belirteç)'ları Math.random() gibi tahmin edilebilir/kriptografik olmayan fonksiyonlarla mı üretiliyor?",
               "symptom": "Zayıf Rastgele Sayı Üretici (PRNG) Kullanımı",
               "weight": 4
             },
@@ -181,7 +181,7 @@
           "threshold": 4,
           "owasp_ref": "A02:2021",
           "remediation": [
-            "Anahtarları ve token'ları her zaman kriptografik olarak güvenli pseudo rastgele sayı üreteçleri (CSPRNG) ile üretin.",
+            "Anahtarları ve token (belirteç)'ları her zaman kriptografik olarak güvenli pseudo rastgele sayı üreteçleri (CSPRNG) ile üretin.",
             "Node.js kullanıyorsanız 'crypto.randomBytes()' veya benzeri güvenilir modüller kullanın."
           ],
           "references": [
@@ -191,26 +191,26 @@
         },
         {
           "id": "R-CF-04",
-          "name": "Sensitive Data in Transit",
+          "name": "Sensitive Data in Transit (İletim Sırasındaki Hassas Veriler)",
           "cwe": "CWE-319",
           "description": "Hassas verilerin şifrelenmemiş kanallar üzerinden iletilmesi.",
           "indicators": [
             {
               "id": "CF-S4",
-              "question": "Uygulama HTTP üzerinden hassas veri (şifre, token, kredi kartı) iletiyor mu?",
+              "question": "Uygulama HTTP üzerinden hassas veri (şifre, token (belirteç), kredi kartı) iletiyor mu?",
               "symptom": "Şifrelenmemiş Veri İletimi",
               "weight": 3
             },
             {
               "id": "CF-S5",
-              "question": "HSTS header'ı (Strict-Transport-Security) uygulanıyor mu?",
+              "question": "HSTS (Sıkı Taşıma Güvenliği) header'ı (Strict-Transport-Security) uygulanıyor mu?",
               "symptom": "Protokol Yükseltme Zorunluluğu Eksikliği",
               "weight": 2,
               "inverse": true
             },
             {
               "id": "CF-S6",
-              "question": "TLS sertifikası doğrulaması devre dışı bırakılmış mı?",
+              "question": "TLS (Taşıma Katmanı Güvenliği) sertifikası doğrulaması devre dışı bırakılmış mı?",
               "symptom": "Sertifika Doğrulama Eksikliği",
               "weight": 3
             }
@@ -219,8 +219,8 @@
           "owasp_ref": "A02:2021",
           "remediation": [
             "HTTPS'i zorunlu kılın ve HTTP'yi 301 ile yönlendirin.",
-            "HSTS header'ı ekleyin: Strict-Transport-Security: max-age=31536000; includeSubDomains.",
-            "TLS 1.2 veya üstü kullanın."
+            "HSTS (Sıkı Taşıma Güvenliği) header'ı ekleyin: Strict-Transport-Security: max-age=31536000; includeSubDomains.",
+            "TLS (Taşıma Katmanı Güvenliği) 1.2 veya üstü kullanın."
           ],
           "references": [
             "https://owasp.org/Top10/A02_2021-Cryptographic_Failures/",
@@ -231,31 +231,31 @@
     },
     {
       "id": "A03:2021",
-      "name": "Injection",
+      "name": "Injection (Enjeksiyon)",
       "severity": "critical",
-      "description": "Güvenilmeyen verinin yorumlayıcılara (SQL, OS, LDAP) komut veya sorgu olarak gönderilmesi.",
+      "description": "Güvenilmeyen verinin yorumlayıcılara (SQL (Yapılandırılmış Sorgu Dili), OS, LDAP) komut veya sorgu olarak gönderilmesi.",
       "types": [
         {
           "id": "R-SQLI-01",
-          "name": "SQL Enjeksiyonu (SQL Injection - SQLi)",
+          "name": "SQL Enjeksiyonu (SQL (Yapılandırılmış Sorgu Dili) Injection - SQL (Yapılandırılmış Sorgu Dili)i)",
           "cwe": "CWE-89",
-          "description": "Kullanıcı girdilerinin doğrudan SQL sorgularına dahil edilmesi ve veritabanı üzerinde yetkisiz işlem yapılması.",
+          "description": "Kullanıcı girdilerinin doğrudan SQL (Yapılandırılmış Sorgu Dili) sorgularına dahil edilmesi ve veritabanı üzerinde yetkisiz işlem yapılması.",
           "indicators": [
             {
               "id": "S1",
               "question": "Kullanıcı, arama kutusuna ' OR 1=1 -- yazarak tüm veritabanı kayıtlarına erişebilmektedir.",
-              "symptom": "Boolean SQLi (Veri İfşası)",
+              "symptom": "Boolean SQL (Yapılandırılmış Sorgu Dili)i (Veri İfşası)",
               "weight": 3
             },
             {
               "id": "S2",
-              "question": "Hata sayfasında SQL sözdizimi hatası ve tablo/sütun isimleri kullanıcıya gösterilmektedir.",
+              "question": "Hata sayfasında SQL (Yapılandırılmış Sorgu Dili) sözdizimi hatası ve tablo/sütun isimleri kullanıcıya gösterilmektedir.",
               "symptom": "Hata Tabanlı SQL Yanıtı",
               "weight": 3
             },
             {
               "id": "S3",
-              "question": "SQL sorguları, kullanıcıdan gelen metin doğrudan eklenerek (+ ile birleştirilerek) oluşturulmaktadır.",
+              "question": "SQL (Yapılandırılmış Sorgu Dili) sorguları, kullanıcıdan gelen metin doğrudan eklenerek (+ ile birleştirilerek) oluşturulmaktadır.",
               "symptom": "String Concatenation ile SQL Oluşturma",
               "weight": 3
             },
@@ -274,7 +274,7 @@
             {
               "id": "S6",
               "question": "UNION SELECT komutu kullanılarak kullanıcıların şifre hash'leri elde edilebilmektedir.",
-              "symptom": "Veri Sızıntısı (UNION SQLi)",
+              "symptom": "Veri Sızıntısı (UNION SQL (Yapılandırılmış Sorgu Dili)i)",
               "weight": 4
             },
             {
@@ -290,7 +290,7 @@
             "Tüm sorgularda prepared statement ve parameterized query kullanın.",
             "Sunucu tarafında whitelist tabanlı giriş doğrulama uygulayın.",
             "Veritabanı hesabına minimum yetki verin.",
-            "WAF ile SQL injection girişimlerini filtreleyin."
+            "WAF (Web Uygulama Güvenlik Duvarı) ile SQL injection girişimlerini filtreleyin."
           ],
           "references": [
             "https://owasp.org/Top10/A03_2021-Injection/"
@@ -298,14 +298,14 @@
         },
         {
           "id": "R-XSS-01",
-          "name": "Siteler Arası Betik Çalıştırma (Cross-Site Scripting - XSS)",
+          "name": "Siteler Arası Betik Çalıştırma (Cross-Site Scripting - XSS (Siteler Arası Betik Çalıştırma))",
           "cwe": "CWE-79",
           "description": "Zararlı JavaScript kodlarının tarayıcıda yürütülmesine izin verilmesi.",
           "indicators": [
             {
               "id": "S15",
               "question": "Yorum alanına <script>alert('XSS')</script> yazıldığında bu kod diğer ziyaretçilerin tarayıcısında çalışmaktadır.",
-              "symptom": "Stored (Kalıcı) XSS",
+              "symptom": "Stored (Kalıcı) XSS (Siteler Arası Betik Çalıştırma)",
               "weight": 4
             },
             {
@@ -316,14 +316,14 @@
             },
             {
               "id": "S17",
-              "question": "Saldırgan, XSS açığı sayesinde başka bir kullanıcının oturum çerezini (session cookie) çalabilmektedir.",
+              "question": "Saldırgan, XSS (Siteler Arası Betik Çalıştırma) açığı sayesinde başka bir kullanıcının oturum çerezini (session cookie) çalabilmektedir.",
               "symptom": "Session Çalma (Oturum Devri)",
               "weight": 4
             },
             {
               "id": "S18",
-              "question": "Sitede herhangi bir Content-Security-Policy (CSP) HTTP başlığı bulunmamaktadır.",
-              "symptom": "CSP Eksikliği",
+              "question": "Sitede herhangi bir Content-Security-Policy (CSP (İçerik Güvenlik Politikası)) HTTP başlığı bulunmamaktadır.",
+              "symptom": "CSP (İçerik Güvenlik Politikası) Eksikliği",
               "weight": 2
             },
             {
@@ -340,8 +340,8 @@
             },
             {
               "id": "S21",
-              "question": "Saldırgan, XSS açığı aracılığıyla kullanıcıları kimlik avı (phishing) sitesine yönlendirebilmektedir.",
-              "symptom": "Zararlı Yönlendirme (XSS)",
+              "question": "Saldırgan, XSS (Siteler Arası Betik Çalıştırma) açığı aracılığıyla kullanıcıları kimlik avı (phishing) sitesine yönlendirebilmektedir.",
+              "symptom": "Zararlı Yönlendirme (XSS (Siteler Arası Betik Çalıştırma))",
               "weight": 4
             }
           ],
@@ -360,13 +360,13 @@
     },
     {
       "id": "A04:2021",
-      "name": "Insecure Design",
+      "name": "Insecure Design (Güvensiz Tasarım)",
       "severity": "high",
       "description": "Risk profilinin yetersiz belirlenmesi veya sistem tasarımındaki temel güvenlik mimarisi eksiklikleri.",
       "types": [
         {
           "id": "R-ID-01",
-          "name": "Missing Threat Modeling",
+          "name": "Missing Threat Modeling (Eksik Tehdit Modelleme)",
           "cwe": "CWE-1008",
           "description": "Uygulama tasarlanırken tehdit modellemesi yapılmamış olması.",
           "indicators": [
@@ -395,7 +395,7 @@
           "threshold": 4,
           "owasp_ref": "A04:2021",
           "remediation": [
-            "Yazılım geliştirme yaşam döngüsünün (SDLC) en başında tehdit modellemesi yapın.",
+            "Yazılım geliştirme yaşam döngüsünün (SDLC (Yazılım Geliştirme Yaşam Döngüsü)) en başında tehdit modellemesi yapın.",
             "Güvenli tasarım prensiplerini bütçelendirme ve mimari planlama aşamasında belirleyin.",
             "Birim ve entegrasyon testlerine iş mantığı senaryolarını dahil edin."
           ],
@@ -407,7 +407,7 @@
     },
     {
       "id": "A05:2021",
-      "name": "Security Misconfiguration",
+      "name": "Security Misconfiguration (Güvenlik Yapılandırma Hataları)",
       "severity": "high",
       "description": "Güvenlik ayarlarının hatalı veya eksik yapılandırılması.",
       "types": [
@@ -437,7 +437,7 @@
             },
             {
               "id": "S32",
-              "question": "MySQL (3306), MongoDB (27017) gibi veritabanı portları internete açık durumdadır.",
+              "question": "MySQL (Yapılandırılmış Sorgu Dili) (3306), MongoDB (27017) gibi veritabanı portları internete açık durumdadır.",
               "symptom": "Gereksiz Servis İfşası (Port)",
               "weight": 4
             },
@@ -480,13 +480,13 @@
     },
     {
       "id": "A06:2021",
-      "name": "Vulnerable and Outdated Components",
+      "name": "Vulnerable and Outdated Components (Zafiyetli ve Güncel Olmayan Bileşenler)",
       "severity": "medium",
       "description": "Bilinen zafiyetlere sahip veya güncel olmayan yazılım bileşenlerinin (kütüphaneler, frameworkler) kullanılması.",
       "types": [
         {
           "id": "R-VOC-01",
-          "name": "Using Components with Known Vulnerabilities",
+          "name": "Using Components with Known Vulnerabilities (Bilinen Zafiyetleri Olan Bileşenlerin Kullanımı)",
           "cwe": "CWE-1104",
           "description": "Güvenlik açığı barındıran eklenti, paket veya işletim sistemlerinin kullanımı.",
           "indicators": [
@@ -505,7 +505,7 @@
             },
             {
               "id": "VOC-S3",
-              "question": "Geliştirme ekibi, bağımlılıklardaki zafiyetleri gösteren (SCA) araçlar (örn: npm audit, Snyk) kullanıyor mu?",
+              "question": "Geliştirme ekibi, bağımlılıklardaki zafiyetleri gösteren (SCA (Yazılım Bileşeni Analizi)) araçlar (örn: npm audit, Snyk) kullanıyor mu?",
               "symptom": "Otomatik Bağımlılık Taraması Yok",
               "weight": 2,
               "inverse": true
@@ -515,8 +515,8 @@
           "owasp_ref": "A06:2021",
           "remediation": [
             "Kullanılmayan modülleri, özellikleri ve dosyaları sistemden kaldırın.",
-            "Bileşen sürümlerini bir envanter (BOM) aracı ile sürekli takip edin.",
-            "Güvenlik yamalarını hızlıca uygulayacak CI/CD süreçleri kurun."
+            "Bileşen sürümlerini bir envanter (BOM (Malzeme Listesi)) aracı ile sürekli takip edin.",
+            "Güvenlik yamalarını hızlıca uygulayacak CI/CD (Sürekli Entegrasyon ve Dağıtım) süreçleri kurun."
           ],
           "references": [
             "https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components/"
@@ -526,7 +526,7 @@
     },
     {
       "id": "A07:2021",
-      "name": "Identification and Authentication Failures",
+      "name": "Identification and Authentication Failures (Kimlik Tanımlama ve Doğrulama Hataları)",
       "severity": "high",
       "description": "Kimlik doğrulama ve oturum yönetimindeki zayıflıklar.",
       "types": [
@@ -550,7 +550,7 @@
             },
             {
               "id": "S24",
-              "question": "Çok faktörlü kimlik doğrulama (MFA / 2FA) seçeneği hiç sunulmamaktadır.",
+              "question": "Çok faktörlü kimlik doğrulama (MFA / 2FA (Çok Faktörlü Doğrulama)) seçeneği hiç sunulmamaktadır.",
               "symptom": "MFA Bulunmaması",
               "weight": 2
             },
@@ -589,7 +589,7 @@
             "Giriş sonrasında yeni oturum ID'si oluşturun.",
             "MFA seçeneği sunun veya zorunlu kılın.",
             "Kullanıcı başarıyla giriş yaptığında her zaman yeni bir Session ID oluşturun (Session Regeneration).",
-            "Şifre sıfırlama token'larını kısa ömürlü (örn: 15-30 dakika) ve tek kullanımlık yapın."
+            "Şifre sıfırlama token (belirteç)'larını kısa ömürlü (örn: 15-30 dakika) ve tek kullanımlık yapın."
           ],
           "references": [
             "https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html",
@@ -602,13 +602,13 @@
     },
     {
       "id": "A08:2021",
-      "name": "Software and Data Integrity Failures",
+      "name": "Software and Data Integrity Failures (Yazılım ve Veri Bütünlüğü Hataları)",
       "severity": "high",
-      "description": "Yazılım güncellemelerinin, kritik verilerin veya CI/CD zincirinin doğrulanamaması.",
+      "description": "Yazılım güncellemelerinin, kritik verilerin veya CI/CD (Sürekli Entegrasyon ve Dağıtım) zincirinin doğrulanamaması.",
       "types": [
         {
           "id": "R-SDI-01",
-          "name": "Insecure CI/CD ve Deserialization",
+          "name": "Insecure CI/CD (Sürekli Entegrasyon ve Dağıtım) ve Deserialization",
           "cwe": "CWE-829",
           "description": "Kaynağı belirsiz verilerin deserializasyonu veya güvenilmeyen repolardan paket çekilmesi.",
           "indicators": [
@@ -627,8 +627,8 @@
             },
             {
               "id": "SDI-S3",
-              "question": "CI/CD süreçleri (örn: GitHub Actions, Jenkins) üzerinde kod incelenmeden doğrudan üretim ortamına dağıtım yapılabiliyor mu?",
-              "symptom": "Güvensiz CI/CD Pipeline",
+              "question": "CI/CD (Sürekli Entegrasyon ve Dağıtım) süreçleri (örn: GitHub Actions, Jenkins) üzerinde kod incelenmeden doğrudan üretim ortamına dağıtım yapılabiliyor mu?",
+              "symptom": "Güvensiz CI/CD (Sürekli Entegrasyon ve Dağıtım) Pipeline",
               "weight": 2
             }
           ],
@@ -637,7 +637,7 @@
           "remediation": [
             "Güvenilmeyen kaynaklardan alınan verileri deserialize etmeyin; bunun yerine JSON gibi saf veri formatları kullanın.",
             "Tüm yazılım güncellemelerinde bütünlük (hash) ve dijital imza doğrulaması yapın.",
-            "SCA (Software Composition Analysis) araçlarını CI/CD süreçlerinize entegre edin."
+            "SCA (Yazılım Bileşeni Analizi) araçlarını CI/CD (Sürekli Entegrasyon ve Dağıtım) süreçlerinize entegre edin."
           ],
           "references": [
             "https://owasp.org/Top10/A08_2021-Software_and_Data_Integrity_Failures/"
@@ -647,13 +647,13 @@
     },
     {
       "id": "A09:2021",
-      "name": "Security Logging and Monitoring Failures",
+      "name": "Security Logging and Monitoring Failures (Güvenlik Günlüğü ve İzleme Hataları)",
       "severity": "medium",
       "description": "Sistemdeki güvenlik olaylarının yeterince izlenmemesi ve loglanmaması, bu nedenle saldırıların geç fark edilmesi.",
       "types": [
         {
           "id": "R-LOG-01",
-          "name": "Insufficient Logging",
+          "name": "Insufficient Logging (Yetersiz Günlükleme)",
           "cwe": "CWE-778",
           "description": "Kritik işlemlerin, hataların ve yetkilendirme başarısızlıklarının kayıt altına alınmaması.",
           "indicators": [
@@ -694,7 +694,7 @@
     },
     {
       "id": "A10:2021",
-      "name": "Server-Side Request Forgery (SSRF)",
+      "name": "Server-Side Request Forgery (SSRF) (Sunucu Taraflı İstek Sahteciliği)",
       "severity": "high",
       "description": "Sunucunun, kullanıcının belirttiği bir URL'ye istek atması ve bu isteğin hedefini doğrulamaması.",
       "types": [

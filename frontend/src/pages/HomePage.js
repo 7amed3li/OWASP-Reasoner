@@ -17,16 +17,16 @@ const SEVERITY_BADGE_CLASS = {
 };
 
 const CATEGORY_SUBTITLES = {
-    'A01:2021': 'Yetkisiz veri erişimi (Unauthorized data access)',
-    'A02:2021': 'Zayıf veya eksik şifreleme (Weak or missing encryption)',
-    'A03:2021': 'Komut olarak güvenilmeyen veriler (Untrusted data as commands)',
-    'A04:2021': 'Eksik güvenlik mimarisi (Missing security architecture)',
-    'A05:2021': 'Açığa çıkan varsayılanlar ve hatalar (Exposed defaults and errors)',
-    'A06:2021': 'Güncel olmayan bağımlılıklar (Outdated dependencies)',
-    'A07:2021': 'Bozuk oturum yönetimi (Broken session management)',
-    'A08:2021': 'Doğrulanmamış yazılım güncellemeleri (Unverified software updates)',
-    'A09:2021': 'Eksik güvenlik olay kayıtları (Missing security event records)',
-    'A10:2021': 'Sunucu taraflı istek sahteciliği (Server-side request forgery)',
+    'A01:2021': 'Broken Access Control (Bozuk Erişim Kontrolü)',
+    'A02:2021': 'Cryptographic Failures (Kriptografik Hatalar)',
+    'A03:2021': 'Injection (Enjeksiyon)',
+    'A04:2021': 'Insecure Design (Güvensiz Tasarım)',
+    'A05:2021': 'Security Misconfiguration (Güvenlik Yapılandırma Hataları)',
+    'A06:2021': 'Vulnerable and Outdated Components (Zafiyetli ve Güncel Olmayan Bileşenler)',
+    'A07:2021': 'Identification and Authentication Failures (Kimlik Tanımlama ve Doğrulama Hataları)',
+    'A08:2021': 'Software and Data Integrity Failures (Yazılım ve Veri Bütünlüğü Hataları)',
+    'A09:2021': 'Security Logging and Monitoring Failures (Güvenlik Günlüğü ve İzleme Hataları)',
+    'A10:2021': 'Server-Side Request Forgery (SSRF) (Sunucu Taraflı İstek Sahteciliği)',
 };
 
 const SEVERITY_TR = {
@@ -58,17 +58,17 @@ export default function HomePage({ onStart }) {
                 <section className="hero">
                     <div className="hero-inner">
                         <div className="hero-left">
-                            <div className="eyebrow">İleri Zincirleme Çıkarım (Forward Chaining Inference)</div>
+                            <div className="eyebrow">FORWARD CHAINING (İLERİ ZİNCİRLEME ÇIKARIM)</div>
                             <h1>Web Uygulama<br/><span>Güvenlik Analizi</span></h1>
                             <p className="hero-subtitle">
-                                Uygulamanızı profesyonel bir ileri zincirleme çıkarım motoru kullanarak OWASP Top 10 standartlarına göre analiz edin.
+                                Uygulamanızı ileri zincirleme çıkarım yöntemiyle OWASP Top 10 standartlarına göre analiz edin.
                             </p>
                             <div className="cta-row">
                                 <button className="btn btn-primary" onClick={() => onStart()} disabled={!!error}>
                                     Analizi Başlat
                                 </button>
                                 <a href="https://owasp.org/Top10/" target="_blank" rel="noreferrer" className="btn btn-secondary">
-                                    OWASP Dokümantasyonu
+                                    OWASP DOCUMENTATION  
                                 </a>
                             </div>
                             {error && (
@@ -81,19 +81,19 @@ export default function HomePage({ onStart }) {
                             <div className="metrics-grid">
                                 <div className="metric-card">
                                     <span className="metric-val">{totalCategories}</span>
-                                    <span className="metric-label">Kategoriler<br/>(Categories)</span>
+                                    <span className="metric-label">CATEGORIES (KATEGORİLER)</span>
                                 </div>
                                 <div className="metric-card">
                                     <span className="metric-val">{totalRules}</span>
-                                    <span className="metric-label">Güvenlik Kontrolü<br/>(Checks)</span>
+                                    <span className="metric-label">SECURITY CHECKS (GÜVENLİK KONTROLLERİ)</span>
                                 </div>
                                 <div className="metric-card">
                                     <span className="metric-val">20+</span>
-                                    <span className="metric-label">Zafiyet Tipi<br/>(Rule Types)</span>
+                                    <span className="metric-label">VULNERABILITY TYPES (ZAFİYET TİPLERİ)</span>
                                 </div>
                                 <div className="metric-card">
                                     <span className="metric-val">2021</span>
-                                    <span className="metric-label">OWASP<br/>Standardı</span>
+                                    <span className="metric-label">OWASP STANDARD (STANDARDI)</span>
                                 </div>
                             </div>
                         </div>
@@ -145,7 +145,7 @@ export default function HomePage({ onStart }) {
                                         <span className={`badge ${SEVERITY_BADGE_CLASS[cat.severity] || 'badge-medium'}`}>
                                             {SEVERITY_TR[cat.severity] || cat.severity}
                                         </span>
-                                        <span className="rule-count">{cat.typeCount} kural</span>
+                                        <span className="rule-count">{cat.typeCount} RULES (KURAL)</span>
                                     </div>
                                 </div>
                             ))}

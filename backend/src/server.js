@@ -4,6 +4,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const OWASPInferenceEngine = require('./engine');
 
 const app = express();
@@ -62,6 +63,15 @@ app.post('/api/analyze', (req, res) => {
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', version: '2.0.0', engine: 'Forward Chaining' });
 });
+
+// Serve React frontend in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../../frontend/build')));
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../../frontend/build/index.html'));
+    });
+}
 
 // Sunucuyu sadece doğrudan çalıştırıldığında başlat (import edilince başlatma)
 if (require.main === module) {

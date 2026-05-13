@@ -66,7 +66,7 @@ export default function QuizPage({ categoryId, onComplete }) {
                 <div className="progress-fill" style={{ width: `${progress}%` }} />
             </div>
             <div className="progress-labels">
-                <span>Analiz İlerlemesi (Progress)</span>
+                <span>PROGRESS (ANALİZ İLERLEMESİ)</span>
                 <span>{Math.round(progress)}%</span>
             </div>
 
@@ -104,11 +104,11 @@ export default function QuizPage({ categoryId, onComplete }) {
                     <div className="sidebar-stats">
                         <div>
                             <span className="stat-val">{answered}</span>
-                            <span className="section-label">CEVAPLANAN (ANSWERED)</span>
+                            <span className="section-label">ANSWERED (CEVAPLANAN)</span>
                         </div>
                         <div>
                             <span className="stat-val">{questions.length - answered}</span>
-                            <span className="section-label">KALAN (REMAINING)</span>
+                            <span className="section-label">REMAINING (KALAN)</span>
                         </div>
                     </div>
                 </aside>
@@ -129,7 +129,7 @@ export default function QuizPage({ categoryId, onComplete }) {
 
                     <div className="nav-row">
                         <button className="btn-prev" onClick={handlePrev} disabled={currentIdx === 0}>
-                            ← Önceki (Previous)
+                            PREVIOUS (ÖNCEKİ) ←
                         </button>
                         <div className="nav-center">
                             <div className="status-dot"></div>
@@ -148,11 +148,11 @@ export default function QuizPage({ categoryId, onComplete }) {
                             )}
                             {!isLast ? (
                                 <button className="btn btn-primary" onClick={handleNext}>
-                                    Sonraki (Next) →
+                                    NEXT (SONRAKİ) →
                                 </button>
                             ) : (
                                 <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>
-                                    {submitting ? 'Analiz ediliyor...' : '🎯 Sonuçları Gör (Show Results)'}
+                                    🎯 SHOW RESULTS (SONUÇLARI GÖR)
                                 </button>
                             )}
                         </div>

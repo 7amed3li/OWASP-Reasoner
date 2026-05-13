@@ -29,7 +29,7 @@ function RuleTypeCard({ type, severityColor }) {
             </div>
             
             <div className="v-card-section">
-                <div className="v-section-label">SYMPTOMS</div>
+                <div className="v-section-label">SYMPTOMS (BELİRTİLER)</div>
                 {type.triggeredIndicators.map(ind => (
                     <div className="v-symptom-row" key={ind.id}>
                         <span className="v-symptom-text">{ind.symptom}</span>
@@ -39,7 +39,7 @@ function RuleTypeCard({ type, severityColor }) {
             </div>
 
             <div className="v-card-section">
-                <div className="v-section-label">RECOMMENDATIONS</div>
+                <div className="v-section-label">RECOMMENDATIONS (ÖNERİLER)</div>
                 {type.remediation.map((r, i) => (
                     <div className="v-rec-row" key={i}>
                         <div className="v-rec-icon">
@@ -181,13 +181,13 @@ export default function ResultsPage({ result, onRestart }) {
 
             <div className="results-footer">
                 <button className="btn-restart" onClick={onRestart}>
-                    Yeni Analiz Başlat
+                    RESTART ANALYSIS (YENİ ANALİZ BAŞLAT)
                 </button>
                 <div className="footer-meta">
                     {new Date(result.timestamp).toLocaleString('en-US', { 
                         month: 'numeric', day: 'numeric', year: 'numeric', 
                         hour: 'numeric', minute: 'numeric', hour12: true 
-                    })} · İleri Zincirleme Çıkarım Motoru
+                    })} · FORWARD CHAINING (İLERİ ZİNCİRLEME ÇIKARIM)
                 </div>
             </div>
         </div>

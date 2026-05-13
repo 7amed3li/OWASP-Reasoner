@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:3001/api';
+const API_BASE = process.env.REACT_APP_API_BASE || '/api';
 const TIMEOUT_MS = 10000;
 
 /** Belirli süre sonra isteği iptal eden AbortSignal üretir */
